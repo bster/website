@@ -1,295 +1,44 @@
-/* ── Reset & base ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --bg:        #0d0d0f;
-  --surface:   #16161a;
-  --border:    #2a2a35;
-  --accent:    #f72585;   /* hot pink — ball & highlights */
-  --accent2:   #7209b7;   /* purple — secondary */
-  --text:      #e8e8f0;
-  --muted:     #888899;
-  --font-sans: 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Fira Code', 'Cascadia Code', monospace;
-  --radius:    8px;
-  --section-gap: 6rem;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  line-height: 1.65;
-}
-
-/* ── Hero ──────────────────────────────────────────────────────────── */
-#hero {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  padding: 2rem 1rem;
-  background: radial-gradient(ellipse at 50% 0%, #1a0a2e 0%, var(--bg) 70%);
-}
-
-.hero-text { text-align: center; }
-
-.hero-text h1 {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #fff 30%, var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.tagline {
-  color: var(--muted);
-  font-size: 1.1rem;
-  margin-top: 0.5rem;
-  font-style: italic;
-}
-
-/* ── Game wrapper ──────────────────────────────────────────────────── */
-#game-wrapper {
-  position: relative;
-  width: min(780px, 96vw);
-  aspect-ratio: 4 / 3;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: 0 0 60px rgba(247, 37, 133, 0.15);
-}
-
-#game-canvas {
-  display: block;
+html, body {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  background: #f7f6f3;
 }
 
-/* ── In-game UI ────────────────────────────────────────────────────── */
-#game-ui {
-  position: absolute;
-  top: 10px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 14px;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--muted);
-  pointer-events: none;
+#cv-canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
 }
 
-/* ── Overlay (start / game-over / win) ─────────────────────────────── */
-#game-overlay {
-  position: absolute;
-  inset: 0;
+/* ── Fixed corner links ─────────────────────────────────────────── */
+.corner-links {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(13, 13, 15, 0.85);
-  backdrop-filter: blur(4px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s;
+  gap: 16px;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  z-index: 10;
 }
 
-#game-overlay.visible {
-  opacity: 1;
-  pointer-events: all;
-}
+.corner-links:hover { opacity: 0.7; }
 
-.overlay-box {
-  text-align: center;
-  padding: 2.5rem 3rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  max-width: 340px;
-}
-
-.overlay-box h2 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-  color: var(--accent);
-}
-
-.overlay-box p {
-  color: var(--muted);
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-}
-
-/* ── Shared button style ───────────────────────────────────────────── */
-button {
-  display: inline-block;
-  padding: 0.6rem 1.8rem;
-  background: var(--accent);
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-
-button:hover  { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(247,37,133,0.4); }
-button:active { transform: translateY(0); }
-
-/* ── Brick tooltip ─────────────────────────────────────────────────── */
-#brick-tooltip {
-  position: absolute;
-  bottom: 56px;          /* sits just above the paddle zone */
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(114, 9, 183, 0.92);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  line-height: 1.4;
-  padding: 0.45rem 0.9rem;
-  border-radius: var(--radius);
-  border: 1px solid rgba(180, 79, 232, 0.5);
-  max-width: 86%;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s;
-  white-space: normal;
-}
-
-#brick-tooltip.show {
-  opacity: 1;
-}
-
-/* ── Sections ──────────────────────────────────────────────────────── */
-section { padding: var(--section-gap) 1rem; }
-
-.section-inner {
-  max-width: 680px;
-  margin: 0 auto;
-}
-
-section h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin-bottom: 1.25rem;
-  position: relative;
-  display: inline-block;
-}
-
-section h2::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  width: 100%;
-  height: 3px;
-  background: var(--accent);
-  border-radius: 2px;
-}
-
-section p + p { margin-top: 0.9rem; }
-
-/* ── Bio ───────────────────────────────────────────────────────────── */
-#bio { background: var(--surface); }
-
-/* ── Links ─────────────────────────────────────────────────────────── */
-.link-row {
+.corner-links a {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-}
-
-.link-card {
-  display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.65rem 1.4rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
+  color: #333;
   text-decoration: none;
-  font-weight: 600;
-  transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  transition: color 0.15s;
 }
 
-.link-card svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-  flex-shrink: 0;
+.corner-links a:hover { color: #000; }
+
+.corner-links svg {
+  width: 18px;
+  height: 18px;
 }
-
-.link-card:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: translateY(-2px);
-}
-
-/* ── Contact form ──────────────────────────────────────────────────── */
-#contact { background: var(--surface); }
-
-#contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-}
-
-#contact-form label {
-  font-size: 0.85rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: -0.4rem;
-}
-
-#contact-form input,
-#contact-form textarea {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  padding: 0.65rem 0.9rem;
-  width: 100%;
-  transition: border-color 0.2s;
-  resize: vertical;
-}
-
-#contact-form input:focus,
-#contact-form textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-#contact-form button { align-self: flex-start; margin-top: 0.25rem; }
-
-/* ── Footer ────────────────────────────────────────────────────────── */
-footer {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: var(--muted);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--border);
-}
-
-/* ── Scrollbar (cosmetic) ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }

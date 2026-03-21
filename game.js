@@ -1,612 +1,572 @@
 'use strict';
 
-/* ── CV data ─────────────────────────────────────────────────────────
-   Each entry becomes one brick.
-   category → colour family; label → short brick text; detail → tooltip
-───────────────────────────────────────────────────────────────────── */
-const CV_DATA = [
-  // ── Experience: Figma ───────────────────────────────────────────────
-  { category: 'exp',   label: 'VP of Product',      detail: 'VP of Product, Growth & Monetization @ Figma (Oct 2025–Present)' },
-  { category: 'exp',   label: 'Sr. Dir Monetiz.',   detail: 'Sr. Director of Product, Monetization @ Figma (Apr–Oct 2025)' },
-  { category: 'exp',   label: 'Dir Monetization',   detail: 'Director of Product, Monetization @ Figma (Aug 2024–Apr 2025)' },
-  { category: 'exp',   label: 'Dir Teamwork',       detail: 'Director of Product, Teamwork @ Figma (Oct 2022–Aug 2024) · Greater Philadelphia' },
-  { category: 'exp',   label: 'Group PM',           detail: 'Group PM @ Figma (Sep 2021–Oct 2022) · Enterprise team: admin, billing & permissions' },
-  { category: 'exp',   label: 'PM Lead',            detail: 'PM Lead @ Figma (Mar 2020–Sep 2021) · Manager & IC for Enterprise team in SF' },
-  { category: 'exp',   label: 'Senior PM',          detail: 'Senior PM @ Figma (Sep 2019–Mar 2020) · Enterprise: admin, billing & permissions' },
+/* ═══════════════════════════════════════════════════════════════════
+   CV BREAKER — the entire page is a canvas-rendered CV.
+   Each character is a collideable object. A ball bounces from the
+   bottom and knocks letters off the page.
+   ═══════════════════════════════════════════════════════════════════ */
 
-  // ── Experience: Dropbox ─────────────────────────────────────────────
-  { category: 'exp',   label: 'PM @ Dropbox',       detail: 'Product Manager @ Dropbox (Jun 2017–Aug 2019) · Core sharing, Dropbox Transfer, Showcase & collaboration' },
-  { category: 'exp',   label: 'Solutions Arch.',    detail: 'Enterprise Solutions Architect @ Dropbox (Nov 2015–Jun 2017) · Led Higher Ed SA team; bridged customers & engineering' },
-  { category: 'exp',   label: 'Account Exec',       detail: 'Account Executive @ Dropbox (Apr–Nov 2015) · K-12 go-to-market; Hack Week project led to two patents (pending)' },
+/* ── Canvas ───────────────────────────────────────────────────────── */
+const canvas = document.getElementById('cv-canvas');
+const ctx    = canvas.getContext('2d');
+const DPR    = window.devicePixelRatio || 1;
 
-  // ── Experience: Earlier ─────────────────────────────────────────────
-  { category: 'exp',   label: 'Dir Ed. Partner.',   detail: 'Director of Educational Partnerships @ TeachBoost (May 2014–Apr 2015) · Closed first school district deals; co-built product roadmap with CEO' },
-  { category: 'exp',   label: 'EdSurge Writer',     detail: 'Contributor @ EdSurge (2012–Mar 2015) · Thought leadership on edtech trends; top-3 most-read article in 2013' },
-  { category: 'exp',   label: 'Ponder Labs',        detail: 'Advisor @ Ponder Labs (May 2013–2015) · Product & GTM advice for early-stage edtech startup · Brooklyn, NY' },
-  { category: 'exp',   label: 'CFR Consultant',     detail: 'Edtech Consultant @ Council on Foreign Relations (Jun 2013–Jul 2014) · Advised on blended-learning initiative' },
-  { category: 'exp',   label: 'Trinity Edtech',     detail: 'Edtech Coordinator @ Trinity School NYC (Jun 2012–Jun 2014) · Built vision for technology transformation in education' },
-  { category: 'exp',   label: 'Teacher & Coach',    detail: 'Teacher & Edtech Coordinator @ Emery/Weiner School, Houston (Jun 2009–Jun 2012) · Overhauled curriculum & tech infrastructure; won Rav Preida Award' },
+let W = window.innerWidth;
+let H = window.innerHeight;
 
-  // ── Education ───────────────────────────────────────────────────────
-  { category: 'edu',   label: 'Bowdoin College',    detail: 'B.A. Government & Legal Studies · Bowdoin College (2005–2009)' },
+/* ── Design tokens ────────────────────────────────────────────────── */
+const BG        = '#f7f6f3';
+const DIV_COLOR = 'rgba(0,0,0,0.1)';
+const FONT      = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
 
-  // ── Skills ──────────────────────────────────────────────────────────
-  { category: 'skill', label: 'Curriculum Design',  detail: 'Top Skill: Curriculum Design — from classroom teacher to curriculum architect' },
-  { category: 'skill', label: 'Edtech',             detail: 'Top Skill: Educational Technology — spanning classroom, startup, and enterprise' },
-  { category: 'skill', label: 'Teaching',           detail: 'Top Skill: Teaching — started as a teacher, still explains things clearly' },
-  { category: 'skill', label: 'Cybersecurity',      detail: 'Cert: Cybersecurity and the X-Factor · Cybersecurity & IoT · Cybersecurity & Mobility' },
-  { category: 'skill', label: 'Front-End Dev',      detail: 'Cert: Build Front-End Web Apps from Scratch — and apparently that includes brick-breaker games' },
-
-  // ── Publications ────────────────────────────────────────────────────
-  { category: 'proj',  label: 'Leap to Edtech',     detail: '"Five Tips for Making the Leap from Teaching to Edtech" — published on EdSurge' },
-  { category: 'proj',  label: 'Teachers in Edtech', detail: '"A Role for Teachers in Every Edtech Startup" — published on EdSurge' },
-  { category: 'proj',  label: 'Best Unit Ever',     detail: '"The Best Unit I\'ve Ever Taught (By Accident)" — published on EdSurge' },
-  { category: 'proj',  label: 'Textbook Obstacle?', detail: '"Part II: Are textbooks an obstacle to learning?" — published on EdSurge' },
-  { category: 'proj',  label: 'IT Calling Shots',   detail: '"Your School\'s IT Department Is Calling the Big Shots Now" — published on EdSurge' },
-
-  // ── Awards & Volunteering ───────────────────────────────────────────
-  { category: 'misc',  label: 'Rav Preida Award',   detail: 'Rav Preida Award for Teaching Excellence — Emery/Weiner School' },
-  { category: 'misc',  label: 'Code/Interactive',   detail: 'Associate Board Member @ C/I - Code/Interactive (2018) · Youth digital literacy nonprofit' },
-  { category: 'misc',  label: 'Mouse Volunteer',    detail: 'Associate Board Member @ Mouse (2018) · Nonprofit expanding CS education access' },
-];
-
-/* ── Colour palette per category ──────────────────────────────────── */
-const CATEGORY_COLORS = {
-  exp:   { fill: '#c9184a', stroke: '#ff4d6d', glow: '#ff4d6d' },
-  edu:   { fill: '#7209b7', stroke: '#b44fe8', glow: '#b44fe8' },
-  skill: { fill: '#3a0ca3', stroke: '#7b5ef8', glow: '#7b5ef8' },
-  proj:  { fill: '#1d4ed8', stroke: '#60a5fa', glow: '#60a5fa' },
-  misc:  { fill: '#0e7490', stroke: '#22d3ee', glow: '#22d3ee' },
+// Each style: { weight, size (px), color }
+const S = {
+  name:    { weight: 700, size: 44,  color: '#0a0a0a' },
+  title:   { weight: 400, size: 16,  color: '#2d2d2d' },
+  meta:    { weight: 400, size: 12,  color: '#9a9a9a' },
+  section: { weight: 700, size: 10,  color: '#b8b8b8' },  // uppercase labels
+  org:     { weight: 600, size: 14,  color: '#111111' },
+  role:    { weight: 400, size: 13,  color: '#4a4a4a' },
+  detail:  { weight: 400, size: 11,  color: '#8a8a8a' },
+  period:  { weight: 400, size: 12,  color: '#c5c5c5' },
 };
 
-/* ── DOM refs ─────────────────────────────────────────────────────── */
-const canvas     = document.getElementById('game-canvas');
-const ctx        = canvas.getContext('2d');
-const overlay    = document.getElementById('game-overlay');
-const overlayBtn = document.getElementById('overlay-btn');
-const titleEl    = document.getElementById('overlay-title');
-const msgEl      = document.getElementById('overlay-msg');
-const scoreEl    = document.getElementById('score');
-const livesEl    = document.getElementById('lives');
-const tooltip    = document.getElementById('brick-tooltip');
+function makeFont(s) { return `${s.weight} ${s.size}px ${FONT}`; }
 
-/* ── Game constants ───────────────────────────────────────────────── */
-const W = 780;
-const H = 585;
+/* ── Physics constants ────────────────────────────────────────────── */
+const BALL_R       = 7;
+const BALL_SPEED   = 4.6;
+const MIN_VY       = 2.2;
+const PADDLE_W     = 120;
+const PADDLE_H     = 5;
 
-const ROWS            = 5;
-const COLS            = 8;
-const BRICK_PAD       = 6;
-const BRICK_TOP       = 52;   // y offset for first row (clears score bar)
-const BRICK_H         = 28;
+/* ── State ────────────────────────────────────────────────────────── */
+let chars     = [];   // alive character objects
+let dead      = [];   // exploding character objects
+let particles = [];   // small dot sparks
+let dividers  = [];   // horizontal rule positions
 
-const PADDLE_W        = 110;
-const PADDLE_H        = 12;
-const PADDLE_Y        = H - 38;
-const PADDLE_SPEED    = 7;
-
-const BALL_R          = 8;
-const BALL_SPEED_INIT = 5.5;
-const BALL_SPEED_MAX  = 10;
-const SPEED_UP_EVERY  = 5;    // speed bump every N bricks broken
-const SPEED_INCREMENT = 0.2;
-const MIN_VY          = 2.8;  // prevent near-horizontal ball
-
-const TRAIL_LEN       = 7;
-const PARTICLES_N     = 12;
-
-/* ── Mutable state ────────────────────────────────────────────────── */
-let bricks    = [];
-let particles = [];
-let trail     = [];
-
-let ball    = {};
-let paddle  = {};
-
-let score          = 0;
-let lives          = 3;
-let bricksDestroyed = 0;
-let currentSpeed   = BALL_SPEED_INIT;
-
-let running   = false;
-let launching = true;   // ball is resting on the paddle, not yet launched
+let ball      = {};
+let paddle    = {};
+let cleared   = false;
 let animId    = null;
 
-const keys = { left: false, right: false };
-let mouseX = null;
+const keys    = { left: false, right: false };
+let mouseX    = null;
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Canvas                                                         ── */
-/* ─────────────────────────────────────────────────────────────────── */
-function resizeCanvas() {
-  canvas.width  = W;
-  canvas.height = H;
+/* ═══════════════════════════════════════════════════════════════════
+   CANVAS INIT
+   ═══════════════════════════════════════════════════════════════════ */
+function initCanvas() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width        = W * DPR;
+  canvas.height       = H * DPR;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Brick grid                                                     ── */
-/* ─────────────────────────────────────────────────────────────────── */
-function buildBricks() {
-  bricks = [];
-  // Shuffle so categories are mixed across the grid
-  const pool = [...CV_DATA].sort(() => Math.random() - 0.5);
-  const brickW = (W - BRICK_PAD * (COLS + 1)) / COLS;
+/* ═══════════════════════════════════════════════════════════════════
+   LAYOUT — measures and places every character
+   ═══════════════════════════════════════════════════════════════════ */
+function buildLayout() {
+  chars    = [];
+  dividers = [];
 
-  let idx = 0;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const entry = pool[idx % pool.length]; idx++;
-      bricks.push({
-        x: BRICK_PAD + c * (brickW + BRICK_PAD),
-        y: BRICK_TOP  + r * (BRICK_H  + BRICK_PAD),
-        w: brickW,
-        h: BRICK_H,
-        label:  entry.label,
-        detail: entry.detail,
-        color:  CATEGORY_COLORS[entry.category] ?? CATEGORY_COLORS.misc,
-        alive:  true,
-      });
+  const contentW = Math.min(680, W - 80);
+  const lx       = (W - contentW) / 2;
+  const rx       = lx + contentW;
+
+  let y = 0; // we'll shift everything to center vertically at the end
+
+  /*
+   * addText — add collideable characters for a string.
+   *   align:   'left' | 'right'
+   *   spacing: extra px between characters (for tracked section labels)
+   */
+  function addText(text, baseX, baseY, style, align = 'left', spacing = 0) {
+    const fnt = makeFont(style);
+    ctx.font  = fnt;
+    const str = (style === S.section) ? text.toUpperCase() : text;
+
+    let curX = baseX;
+    if (align === 'right') {
+      let total = 0;
+      for (const c of str) total += ctx.measureText(c).width + spacing;
+      total -= spacing;
+      curX = baseX - total;
+    }
+
+    for (const c of str) {
+      const cw = ctx.measureText(c).width;
+      if (c.trim() !== '') {
+        chars.push({
+          char:  c,
+          x:     curX,
+          y:     baseY,     // canvas baseline (fillText y)
+          w:     cw,
+          h:     style.size, // approximate cap height — used for collision
+          font:  fnt,
+          color: style.color,
+          alive: true,
+        });
+      }
+      curX += cw + spacing;
     }
   }
+
+  // ── Name
+  addText('Ben Stern', lx, y, S.name);
+  y += 54;
+
+  // ── Current title
+  addText('VP of Product, Growth & Monetization', lx, y, S.title);
+  y += 22;
+
+  // ── Meta line
+  addText('Figma  ·  Greater Philadelphia  ·  benjamin.m.stern@gmail.com', lx, y, S.meta);
+  y += 30;
+
+  // ── Divider
+  dividers.push({ x: lx, y, w: contentW });
+  y += 22;
+
+  // ── EXPERIENCE ──────────────────────────────────────────────────
+  addText('Experience', lx, y, S.section, 'left', 1.5);
+  y += 26;
+
+  // Figma
+  addText('Figma', lx, y, S.org);
+  addText('2019 – Present', rx, y, S.period, 'right');
+  y += 20;
+  addText('VP of Product  ·  Director, Monetization  ·  Director, Teamwork', lx, y, S.role);
+  y += 17;
+  addText('Group PM  ·  PM Lead  ·  Senior PM', lx, y, S.detail);
+  y += 26;
+
+  // Dropbox
+  addText('Dropbox', lx, y, S.org);
+  addText('2015 – 2019', rx, y, S.period, 'right');
+  y += 20;
+  addText('Product Manager  ·  Enterprise Solutions Architect  ·  Account Executive', lx, y, S.role);
+  y += 26;
+
+  // TeachBoost
+  addText('TeachBoost', lx, y, S.org);
+  addText('2014 – 2015', rx, y, S.period, 'right');
+  y += 20;
+  addText('Director of Educational Partnerships', lx, y, S.role);
+  y += 26;
+
+  // EdSurge etc.
+  addText('EdSurge  ·  Ponder Labs  ·  Council on Foreign Relations', lx, y, S.org);
+  addText('2012 – 2015', rx, y, S.period, 'right');
+  y += 20;
+  addText('Contributor  ·  Advisor  ·  Edtech Consultant', lx, y, S.role);
+  y += 26;
+
+  // Teaching
+  addText('Trinity School NYC  ·  Emery/Weiner School', lx, y, S.org);
+  addText('2009 – 2014', rx, y, S.period, 'right');
+  y += 20;
+  addText('Teacher  ·  Edtech Coordinator', lx, y, S.role);
+  y += 30;
+
+  // ── Divider
+  dividers.push({ x: lx, y, w: contentW });
+  y += 22;
+
+  // ── EDUCATION ───────────────────────────────────────────────────
+  addText('Education', lx, y, S.section, 'left', 1.5);
+  y += 26;
+
+  addText('Bowdoin College', lx, y, S.org);
+  addText('2005 – 2009', rx, y, S.period, 'right');
+  y += 20;
+  addText('B.A. Government & Legal Studies', lx, y, S.role);
+  y += 30;
+
+  // ── Divider
+  dividers.push({ x: lx, y, w: contentW });
+  y += 22;
+
+  // ── SKILLS ──────────────────────────────────────────────────────
+  addText('Skills & Recognition', lx, y, S.section, 'left', 1.5);
+  y += 26;
+
+  addText('Curriculum Design  ·  Educational Technology  ·  Teaching  ·  Product Strategy', lx, y, S.role);
+  y += 18;
+  addText('Rav Preida Award for Teaching Excellence  ·  Dropbox Assignments (2 patents pending)', lx, y, S.detail);
+  y += 16;
+  addText('Published on EdSurge  ·  Board Member: Mouse, Code/Interactive', lx, y, S.detail);
+
+  const contentH = y + 20;
+
+  // Center content vertically
+  const offsetY = Math.max(54, (H - contentH) / 2);
+  for (const ch of chars)    ch.y += offsetY;
+  for (const d  of dividers) d.y  += offsetY;
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Ball & paddle                                                  ── */
-/* ─────────────────────────────────────────────────────────────────── */
-function initPaddle() {
-  paddle = { x: W / 2 - PADDLE_W / 2, y: PADDLE_Y, w: PADDLE_W, h: PADDLE_H };
-  mouseX = null;
-}
-
-function initBall() {
-  ball = {
-    x: paddle.x + paddle.w / 2,
-    y: paddle.y - BALL_R - 1,
-    vx: 0,
-    vy: 0,
-    r:  BALL_R,
+/* ═══════════════════════════════════════════════════════════════════
+   PHYSICS INIT
+   ═══════════════════════════════════════════════════════════════════ */
+function initPhysics() {
+  paddle = {
+    x: W / 2 - PADDLE_W / 2,
+    y: H - 44,
+    w: PADDLE_W,
+    h: PADDLE_H,
   };
-  trail     = [];
-  launching = true;
+
+  // Launch ball upward with a random slight angle
+  const angle = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 3);
+  ball = {
+    x:  W / 2,
+    y:  H - 80,
+    vx: Math.cos(angle) * BALL_SPEED,
+    vy: Math.sin(angle) * BALL_SPEED,
+    r:  BALL_R,
+    // Trail
+    trail: [],
+  };
+
+  dead      = [];
+  particles = [];
+  cleared   = false;
 }
 
-function launchBall() {
-  if (!launching || !running) return;
-  launching = false;
-  // Random angle between -75° and -105° (upward, slightly left or right)
-  const angle = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 4);
-  ball.vx = Math.cos(angle) * currentSpeed;
-  ball.vy = Math.sin(angle) * currentSpeed;
-  enforceMinVY();
-}
-
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Physics helpers                                                ── */
-/* ─────────────────────────────────────────────────────────────────── */
-
-// Circle vs AABB test — returns true if colliding
+/* ═══════════════════════════════════════════════════════════════════
+   COLLISION — circle vs axis-aligned rect
+   ═══════════════════════════════════════════════════════════════════ */
 function circleAABB(cx, cy, r, rx, ry, rw, rh) {
-  const nearX = Math.max(rx, Math.min(cx, rx + rw));
-  const nearY = Math.max(ry, Math.min(cy, ry + rh));
-  const dx = cx - nearX;
-  const dy = cy - nearY;
+  const nx = Math.max(rx, Math.min(cx, rx + rw));
+  const ny = Math.max(ry, Math.min(cy, ry + rh));
+  const dx = cx - nx, dy = cy - ny;
   return dx * dx + dy * dy < r * r;
 }
 
-// Ensure |vy| is always meaningful (prevents horizontal skating)
-function enforceMinVY() {
-  if (Math.abs(ball.vy) < MIN_VY) {
-    ball.vy = MIN_VY * (ball.vy <= 0 ? -1 : 1);
-    // Re-normalise to current speed
-    const mag = Math.hypot(ball.vx, ball.vy);
-    if (mag > 0) {
-      ball.vx = (ball.vx / mag) * currentSpeed;
-      ball.vy = (ball.vy / mag) * currentSpeed;
-    }
-  }
-}
+/* ═══════════════════════════════════════════════════════════════════
+   KILL CHAR — eject with physics and spawn sparks
+   ═══════════════════════════════════════════════════════════════════ */
+function killChar(ch) {
+  ch.alive = false;
 
-// Scale ball velocity to currentSpeed without changing direction
-function applyCurrentSpeed() {
-  const mag = Math.hypot(ball.vx, ball.vy);
-  if (mag > 0) {
-    ball.vx = (ball.vx / mag) * currentSpeed;
-    ball.vy = (ball.vy / mag) * currentSpeed;
-  }
-}
+  const speed = 3 + Math.random() * 7;
+  const angle = Math.atan2(ball.vy, ball.vx) + (Math.random() - 0.5) * 1.4;
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Particles                                                      ── */
-/* ─────────────────────────────────────────────────────────────────── */
-function spawnParticles(brick) {
-  const cx = brick.x + brick.w / 2;
-  const cy = brick.y + brick.h / 2;
-  for (let i = 0; i < PARTICLES_N; i++) {
-    const angle = (Math.PI * 2 * i) / PARTICLES_N + Math.random() * 0.6;
-    const speed = 1.5 + Math.random() * 4.5;
+  dead.push({
+    char:   ch.char,
+    font:   ch.font,
+    color:  ch.color,
+    w:      ch.w,
+    h:      ch.h,
+    ex:     ch.x,
+    ey:     ch.y,
+    evx:    Math.cos(angle) * speed,
+    evy:    Math.sin(angle) * speed - 2,
+    erot:   0,
+    espin:  (Math.random() - 0.5) * 0.28,
+    ealpha: 1,
+  });
+
+  // Spark particles
+  for (let i = 0; i < 5; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 1 + Math.random() * 3.5;
     particles.push({
-      x: cx, y: cy,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      life:  1.0,
-      decay: 0.035 + Math.random() * 0.04,
-      r:     2 + Math.random() * 3,
-      color: brick.color.glow,
+      x:     ch.x + ch.w * 0.5,
+      y:     ch.y - ch.h * 0.4,
+      vx:    Math.cos(a) * s,
+      vy:    Math.sin(a) * s,
+      life:  1,
+      decay: 0.05 + Math.random() * 0.05,
+      r:     1 + Math.random() * 2,
+      color: ch.color,
     });
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Tooltip                                                        ── */
-/* ─────────────────────────────────────────────────────────────────── */
-let tooltipTimer = null;
-function showTooltip(text) {
-  tooltip.textContent = text;
-  tooltip.classList.add('show');
-  clearTimeout(tooltipTimer);
-  tooltipTimer = setTimeout(() => tooltip.classList.remove('show'), 3200);
+/* ── Prevent nearly-horizontal ball ──────────────────────────────── */
+function enforceMinVY() {
+  if (Math.abs(ball.vy) < MIN_VY) {
+    ball.vy = MIN_VY * (ball.vy <= 0 ? -1 : 1);
+    const mag = Math.hypot(ball.vx, ball.vy);
+    ball.vx = (ball.vx / mag) * BALL_SPEED;
+    ball.vy = (ball.vy / mag) * BALL_SPEED;
+  }
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Update                                                         ── */
-/* ─────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   UPDATE
+   ═══════════════════════════════════════════════════════════════════ */
 function update() {
+  if (cleared) return;
 
-  /* Paddle movement ─────────────────────────────────────────────── */
+  // ── Paddle
   if (mouseX !== null) {
     paddle.x = mouseX - paddle.w / 2;
   } else {
-    if (keys.left)  paddle.x -= PADDLE_SPEED;
-    if (keys.right) paddle.x += PADDLE_SPEED;
+    if (keys.left)  paddle.x -= 6;
+    if (keys.right) paddle.x += 6;
   }
   paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
 
-  /* Ball glued to paddle while launching ────────────────────────── */
-  if (launching) {
-    ball.x = paddle.x + paddle.w / 2;
-    ball.y = paddle.y - ball.r - 1;
-    return; // skip physics
-  }
+  // ── Ball trail
+  ball.trail.unshift({ x: ball.x, y: ball.y });
+  if (ball.trail.length > 8) ball.trail.pop();
 
-  /* Record pre-move position for reflection logic ───────────────── */
-  const prevX = ball.x;
-  const prevY = ball.y;
-
-  /* Trail ───────────────────────────────────────────────────────── */
-  trail.unshift({ x: ball.x, y: ball.y });
-  if (trail.length > TRAIL_LEN) trail.pop();
-
-  /* Move ────────────────────────────────────────────────────────── */
+  // ── Move ball
+  const prevX = ball.x, prevY = ball.y;
   ball.x += ball.vx;
   ball.y += ball.vy;
 
-  /* Wall collisions ─────────────────────────────────────────────── */
-  if (ball.x - ball.r < 0)  { ball.x = ball.r;      ball.vx =  Math.abs(ball.vx); }
-  if (ball.x + ball.r > W)  { ball.x = W - ball.r;  ball.vx = -Math.abs(ball.vx); }
-  if (ball.y - ball.r < 0)  { ball.y = ball.r;       ball.vy =  Math.abs(ball.vy); }
+  // ── Wall collisions
+  if (ball.x - ball.r < 0)  { ball.x = ball.r;     ball.vx =  Math.abs(ball.vx); }
+  if (ball.x + ball.r > W)  { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
+  if (ball.y - ball.r < 0)  { ball.y = ball.r;      ball.vy =  Math.abs(ball.vy); }
 
-  /* Bottom — lose a life ────────────────────────────────────────── */
+  // ── Out of bottom — relaunch from paddle
   if (ball.y - ball.r > H) {
-    lives--;
-    livesEl.textContent = lives;
-    if (lives <= 0) { endGame(false); return; }
-    initBall(); // resets launching = true
-    return;
-  }
-
-  /* Paddle collision ────────────────────────────────────────────── */
-  const paddleTop = paddle.y;
-  if (
-    ball.vy > 0 &&
-    ball.y + ball.r >= paddleTop &&
-    ball.y + ball.r <= paddleTop + paddle.h + Math.abs(ball.vy) + 1 &&
-    ball.x + ball.r > paddle.x &&
-    ball.x - ball.r < paddle.x + paddle.w
-  ) {
-    // Clamp ball above paddle surface
-    ball.y = paddleTop - ball.r;
-    ball.vy = -Math.abs(ball.vy);
-
-    // Angle based on where it hit (centre → straight up; edge → steep angle)
-    const hitPos  = (ball.x - paddle.x) / paddle.w;        // 0..1
-    const maxAngle = Math.PI * 0.33;                         // ±60° from vertical
-    const angle   = -Math.PI / 2 + (hitPos - 0.5) * 2 * maxAngle;
-    ball.vx = Math.cos(angle) * currentSpeed;
-    ball.vy = Math.sin(angle) * currentSpeed;
+    ball.x      = paddle.x + paddle.w / 2;
+    ball.y      = paddle.y - ball.r - 2;
+    ball.trail  = [];
+    const a     = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 4);
+    ball.vx     = Math.cos(a) * BALL_SPEED;
+    ball.vy     = Math.sin(a) * BALL_SPEED;
     enforceMinVY();
   }
 
-  /* Brick collisions ────────────────────────────────────────────── */
-  let reflectDone = false; // only one reflection per frame
+  // ── Paddle collision
+  if (
+    ball.vy > 0 &&
+    ball.y + ball.r >= paddle.y &&
+    ball.y + ball.r <= paddle.y + paddle.h + Math.abs(ball.vy) + 1 &&
+    ball.x + ball.r > paddle.x &&
+    ball.x - ball.r < paddle.x + paddle.w
+  ) {
+    ball.y = paddle.y - ball.r;
+    const hitPos   = (ball.x - paddle.x) / paddle.w; // 0..1
+    const maxAngle = Math.PI * 0.33;
+    const angle    = -Math.PI / 2 + (hitPos - 0.5) * 2 * maxAngle;
+    ball.vx = Math.cos(angle) * BALL_SPEED;
+    ball.vy = Math.sin(angle) * BALL_SPEED;
+    enforceMinVY();
+  }
 
-  for (const brick of bricks) {
-    if (!brick.alive) continue;
-    if (!circleAABB(ball.x, ball.y, ball.r, brick.x, brick.y, brick.w, brick.h)) continue;
+  // ── Character collisions
+  let reflectDone = false;
 
-    // Destroy brick
-    brick.alive = false;
-    score += 10;
-    scoreEl.textContent = score;
-    bricksDestroyed++;
-    showTooltip(brick.detail);
-    spawnParticles(brick);
+  for (const ch of chars) {
+    if (!ch.alive) continue;
+    // Character rect: top = y - h (y is baseline, h ≈ cap height)
+    if (!circleAABB(ball.x, ball.y, ball.r, ch.x, ch.y - ch.h, ch.w, ch.h)) continue;
 
-    // Speed up every N bricks
-    if (bricksDestroyed % SPEED_UP_EVERY === 0) {
-      currentSpeed = Math.min(currentSpeed + SPEED_INCREMENT, BALL_SPEED_MAX);
-      applyCurrentSpeed();
-    }
+    killChar(ch);
 
-    // Reflect — only once per frame to avoid double-flips on simultaneous hits
     if (!reflectDone) {
       reflectDone = true;
-
-      // Determine which face was hit using the ball's pre-move position:
-      // If the ball was already overlapping the brick horizontally before the
-      // move, it came from top/bottom (flip vy). Otherwise it came from the
-      // side (flip vx). Corner hits flip both.
-      const wasOverX = prevX + ball.r > brick.x && prevX - ball.r < brick.x + brick.w;
-      const wasOverY = prevY + ball.r > brick.y && prevY - ball.r < brick.y + brick.h;
-
-      if (wasOverX && !wasOverY) {
-        ball.vy = -ball.vy;
-      } else if (!wasOverX && wasOverY) {
-        ball.vx = -ball.vx;
-      } else {
-        // Corner — flip both
-        ball.vx = -ball.vx;
-        ball.vy = -ball.vy;
-      }
-
+      // Use pre-move position to determine which face was hit
+      const wasOverX = prevX + ball.r > ch.x          && prevX - ball.r < ch.x + ch.w;
+      const wasOverY = prevY + ball.r > ch.y - ch.h   && prevY - ball.r < ch.y;
+      if      (wasOverX && !wasOverY) ball.vy = -ball.vy;
+      else if (!wasOverX && wasOverY) ball.vx = -ball.vx;
+      else { ball.vx = -ball.vx; ball.vy = -ball.vy; }
       enforceMinVY();
     }
   }
 
-  /* Win condition ───────────────────────────────────────────────── */
-  if (bricks.every(b => !b.alive)) { endGame(true); return; }
+  // ── Win condition
+  if (chars.every(c => !c.alive)) cleared = true;
 
-  /* Update particles ────────────────────────────────────────────── */
+  // ── Dead chars physics
+  for (let i = dead.length - 1; i >= 0; i--) {
+    const d = dead[i];
+    d.ex    += d.evx;
+    d.ey    += d.evy;
+    d.evy   += 0.38;   // gravity
+    d.evx   *= 0.985;  // drag
+    d.erot  += d.espin;
+    d.ealpha -= 0.014;
+    if (d.ealpha <= 0) dead.splice(i, 1);
+  }
+
+  // ── Particles
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.x  += p.vx;
-    p.y  += p.vy;
-    p.vy += 0.22;   // gravity
-    p.vx *= 0.97;   // horizontal drag
+    p.x    += p.vx;
+    p.y    += p.vy;
+    p.vy   += 0.18;
     p.life -= p.decay;
     if (p.life <= 0) particles.splice(i, 1);
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Draw                                                           ── */
-/* ─────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   DRAW
+   ═══════════════════════════════════════════════════════════════════ */
 function draw() {
-
-  /* Background ──────────────────────────────────────────────────── */
-  ctx.fillStyle = '#16161a';
+  // Background
+  ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle dot grid
-  ctx.fillStyle = 'rgba(255,255,255,0.04)';
-  for (let x = 20; x < W; x += 40) {
-    for (let y = 20; y < H; y += 40) {
-      ctx.beginPath();
-      ctx.arc(x, y, 1, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  // ── Dividers
+  ctx.strokeStyle = DIV_COLOR;
+  ctx.lineWidth   = 1;
+  for (const d of dividers) {
+    ctx.beginPath();
+    ctx.moveTo(d.x, d.y);
+    ctx.lineTo(d.x + d.w, d.y);
+    ctx.stroke();
   }
 
-  /* Particles ───────────────────────────────────────────────────── */
+  // ── Dead chars (flying off with spin)
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  for (const d of dead) {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, d.ealpha);
+    ctx.font        = d.font;
+    ctx.fillStyle   = d.color;
+    ctx.translate(d.ex + d.w * 0.5, d.ey - d.h * 0.5);
+    ctx.rotate(d.erot);
+    ctx.fillText(d.char, 0, 0);
+    ctx.restore();
+  }
+
+  // ── Spark particles
   for (const p of particles) {
     ctx.save();
     ctx.globalAlpha = Math.max(0, p.life);
     ctx.fillStyle   = p.color;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur  = 8;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
 
-  /* Ball trail ──────────────────────────────────────────────────── */
-  if (!launching) {
-    for (let i = trail.length - 1; i >= 0; i--) {
-      const t     = 1 - i / trail.length;
-      const alpha = t * 0.3;
-      const r     = ball.r * (0.3 + t * 0.7);
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.beginPath();
-      ctx.arc(trail[i].x, trail[i].y, r, 0, Math.PI * 2);
-      ctx.fillStyle = '#f72585';
-      ctx.fill();
-      ctx.restore();
-    }
+  // ── Alive characters (batch by font+color to minimise state changes)
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign    = 'left';
+  let lastFont = null, lastColor = null;
+  for (const ch of chars) {
+    if (!ch.alive) continue;
+    if (ch.font  !== lastFont)  { ctx.font      = ch.font;  lastFont  = ch.font;  }
+    if (ch.color !== lastColor) { ctx.fillStyle = ch.color; lastColor = ch.color; }
+    ctx.fillText(ch.char, ch.x, ch.y);
   }
 
-  /* Bricks ──────────────────────────────────────────────────────── */
-  for (const brick of bricks) {
-    if (!brick.alive) continue;
-
+  // ── Ball trail
+  for (let i = ball.trail.length - 1; i >= 0; i--) {
+    const t = 1 - i / ball.trail.length;
     ctx.save();
-
-    // Body
-    ctx.fillStyle   = brick.color.fill;
-    ctx.strokeStyle = brick.color.stroke;
-    ctx.lineWidth   = 1.5;
-    roundRect(ctx, brick.x, brick.y, brick.w, brick.h, 4);
-    ctx.fill();
-    ctx.stroke();
-
-    // Top gloss stripe
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    roundRect(ctx, brick.x + 2, brick.y + 2, brick.w - 4, 6, 2);
-    ctx.fill();
-
-    // Label — clip to brick bounds to prevent text overflow
+    ctx.globalAlpha = t * 0.18;
+    ctx.fillStyle   = '#f72585';
     ctx.beginPath();
-    ctx.rect(brick.x + 3, brick.y, brick.w - 6, brick.h);
-    ctx.clip();
-    ctx.fillStyle    = 'rgba(255,255,255,0.92)';
-    ctx.font         = 'bold 11px "Segoe UI", system-ui, sans-serif';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(brick.label, brick.x + brick.w / 2, brick.y + brick.h / 2);
-
+    ctx.arc(ball.trail[i].x, ball.trail[i].y, ball.r * (0.4 + t * 0.6), 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 
-  /* Paddle ──────────────────────────────────────────────────────── */
+  // ── Ball
   ctx.save();
-  const pg = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.h);
-  pg.addColorStop(0, '#ff4fa0');
-  pg.addColorStop(1, '#b5124d');
-  ctx.fillStyle   = pg;
-  ctx.shadowColor = '#f72585';
-  ctx.shadowBlur  = 14;
-  roundRect(ctx, paddle.x, paddle.y, paddle.w, paddle.h, 6);
-  ctx.fill();
-  // Gloss stripe
-  ctx.shadowBlur  = 0;
-  ctx.fillStyle   = 'rgba(255,255,255,0.28)';
-  roundRect(ctx, paddle.x + 6, paddle.y + 2, paddle.w - 12, 4, 2);
-  ctx.fill();
-  ctx.restore();
-
-  /* Ball ────────────────────────────────────────────────────────── */
-  ctx.save();
-  // Outer glow
+  // Soft glow
   ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.r + 4, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(247,37,133,0.15)';
+  ctx.arc(ball.x, ball.y, ball.r + 6, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(247,37,133,0.1)';
   ctx.fill();
-  // Main body
+  // Body
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-  ctx.fillStyle   = '#ffffff';
-  ctx.shadowColor = '#f72585';
-  ctx.shadowBlur  = 18;
-  ctx.fill();
-  // Pink core dot
-  ctx.shadowBlur  = 0;
   ctx.fillStyle   = '#f72585';
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.r * 0.4, 0, Math.PI * 2);
+  ctx.shadowColor = '#f72585';
+  ctx.shadowBlur  = 14;
   ctx.fill();
   ctx.restore();
 
-  /* Launch hint ─────────────────────────────────────────────────── */
-  if (launching && running) {
+  // ── Paddle — thin rounded bar
+  ctx.save();
+  ctx.fillStyle = '#1a1a1a';
+  pillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+  ctx.fill();
+  ctx.restore();
+
+  // ── Cleared screen
+  if (cleared) {
     ctx.save();
-    ctx.font      = '13px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.textAlign = 'center';
-    ctx.fillText('Click or press SPACE to launch', W / 2, paddle.y - 18);
+    // Fade-in white wash
+    ctx.fillStyle = 'rgba(247,246,243,0.94)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle    = '#0a0a0a';
+    ctx.font         = `700 28px ${FONT}`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Hire me anyway?', W / 2, H / 2 - 20);
+    ctx.font      = `400 13px ${FONT}`;
+    ctx.fillStyle = '#9a9a9a';
+    ctx.fillText('benjamin.m.stern@gmail.com', W / 2, H / 2 + 14);
+    ctx.font      = `400 11px ${FONT}`;
+    ctx.fillStyle = '#c5c5c5';
+    ctx.fillText('click to restore', W / 2, H / 2 + 38);
     ctx.restore();
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Utility: rounded rect path                                     ── */
-/* ─────────────────────────────────────────────────────────────────── */
-function roundRect(ctx, x, y, w, h, r) {
+/* ── Pill-shaped rect path ───────────────────────────────────────── */
+function pillRect(x, y, w, h) {
+  const r = h / 2;
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
   ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.arc(x + r, y + r, r, Math.PI / 2, -Math.PI / 2);
   ctx.closePath();
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Game loop                                                      ── */
-/* ─────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   LOOP
+   ═══════════════════════════════════════════════════════════════════ */
 function loop() {
-  if (!running) return;
   update();
   draw();
   animId = requestAnimationFrame(loop);
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Lifecycle                                                      ── */
-/* ─────────────────────────────────────────────────────────────────── */
-function startGame() {
-  score          = 0;
-  lives          = 3;
-  bricksDestroyed = 0;
-  currentSpeed   = BALL_SPEED_INIT;
-  particles      = [];
-  trail          = [];
-
-  scoreEl.textContent = score;
-  livesEl.textContent = lives;
-
-  buildBricks();
-  initPaddle();
-  initBall();
-
-  overlay.classList.remove('visible');
-  running = true;
-  cancelAnimationFrame(animId);
-  loop();
-}
-
-function endGame(won) {
-  running = false;
-  cancelAnimationFrame(animId);
-
-  titleEl.textContent  = won ? 'You win!' : 'Game over';
-  msgEl.textContent    = won
-    ? `You destroyed my entire CV. Score: ${score}. I'm impressed.`
-    : `Score: ${score}. Hire me anyway?`;
-  overlayBtn.textContent = 'Play again';
-  overlay.classList.add('visible');
-}
-
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Input                                                          ── */
-/* ─────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   INPUT
+   ═══════════════════════════════════════════════════════════════════ */
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') keys.left  = true;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
-  if ((e.key === ' ' || e.key === 'Enter') && running) {
-    e.preventDefault();
-    launchBall();
-  }
 });
 document.addEventListener('keyup', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') keys.left  = false;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
 });
 
-// Mouse — track position for paddle; click to launch
-canvas.addEventListener('mousemove', e => {
-  const rect = canvas.getBoundingClientRect();
-  mouseX = (e.clientX - rect.left) * (W / rect.width);
-});
-canvas.addEventListener('mouseleave', () => { mouseX = null; });
-canvas.addEventListener('click', launchBall);
+// Mouse controls paddle position globally (not just within canvas)
+document.addEventListener('mousemove', e => { mouseX = e.clientX; });
 
-// Touch — track finger for paddle; lift to launch
 canvas.addEventListener('touchmove', e => {
   e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  mouseX = (e.touches[0].clientX - rect.left) * (W / rect.width);
+  mouseX = e.touches[0].clientX;
 }, { passive: false });
-canvas.addEventListener('touchend', () => {
-  mouseX = null;
-  launchBall();
+canvas.addEventListener('touchend', () => { mouseX = null; });
+
+// Click to restart after clearing
+canvas.addEventListener('click', () => {
+  if (cleared) {
+    buildLayout();
+    initPhysics();
+  }
 });
 
-/* ─────────────────────────────────────────────────────────────────── */
-/* ── Boot                                                           ── */
-/* ─────────────────────────────────────────────────────────────────── */
-resizeCanvas();
-startGame();
+/* ═══════════════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════════════ */
+initCanvas();
+buildLayout();
+initPhysics();
+loop();
