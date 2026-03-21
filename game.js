@@ -606,10 +606,7 @@ canvas.addEventListener('touchend', () => {
 });
 
 /* ─────────────────────────────────────────────────────────────────── */
-/* ── Boot — draw a static preview before the player hits Play      ── */
+/* ── Boot                                                           ── */
 /* ─────────────────────────────────────────────────────────────────── */
 resizeCanvas();
-buildBricks();
-initPaddle();
-initBall();
-draw();
+startGame();
