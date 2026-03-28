@@ -40,6 +40,7 @@ let aLives     = 3;
 let aDeadTimer = 0;
 let aPhase     = 'playing';
 let aAnimId    = null;
+let aStartTime = 0;
 let aKeys      = {};
 let aCanShoot  = true;
 
@@ -149,6 +150,7 @@ function aInit() {
   aLives     = 3;
   aDeadTimer = 0;
   aPhase     = 'playing';
+  aStartTime = Date.now();
   aCanShoot  = true;
   aKeys      = {};
   aTouchStart   = null;
@@ -260,7 +262,11 @@ function aUpdate() {
   }
 
   // ── Win condition
-  if (aChars.length > 0 && aChars.every(c => !c.alive)) aPhase = 'cleared';
+  if (aPhase === 'playing' && aChars.length > 0 && aChars.every(c => !c.alive)) {
+    aPhase = 'cleared';
+    const score = calcScore(aStartTime, aLives);
+    showScoreModal(score, 'asteroids', null);
+  }
 
   // ── Dead chars physics
   for (let i = aDeadChars.length - 1; i >= 0; i--) {
@@ -497,7 +503,7 @@ function _aOnTouchEnd(e) {
 }
 
 function _aOnClick() {
-  if (aPhase === 'cleared' || aPhase === 'gameover') aInit();
+  if ((aPhase === 'cleared' || aPhase === 'gameover') && !window.scoreModalOpen) aInit();
 }
 
 /* ═══════════════════════════════════════════════════════════════════

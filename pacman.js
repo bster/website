@@ -43,6 +43,7 @@ let pLives     = 3;
 let pDeadTimer = 0;
 let pPhase     = 'playing';
 let pAnimId    = null;
+let pStartTime = 0;
 let pKeys      = {};
 let pTouchStart = null;
 
@@ -118,6 +119,7 @@ function pInit() {
   pLives     = 3;
   pDeadTimer = 0;
   pPhase     = 'playing';
+  pStartTime = Date.now();
   pKeys      = {};
   pTouchStart = null;
   pBuildLayout();
@@ -205,7 +207,12 @@ function pUpdate() {
   }
 
   // ── Win condition
-  if (pChars.length > 0 && pChars.every(c => !c.alive)) { pPhase = 'cleared'; return; }
+  if (pPhase === 'playing' && pChars.length > 0 && pChars.every(c => !c.alive)) {
+    pPhase = 'cleared';
+    const score = calcScore(pStartTime, pLives);
+    showScoreModal(score, 'pacman', null);
+    return;
+  }
 
   // ── Ghost update
   for (const g of pGhosts) {
@@ -521,7 +528,7 @@ function _pOnTouchEnd(e) {
 }
 
 function _pOnClick() {
-  if (pPhase === 'cleared' || pPhase === 'gameover') pInit();
+  if ((pPhase === 'cleared' || pPhase === 'gameover') && !window.scoreModalOpen) pInit();
 }
 
 /* ═══════════════════════════════════════════════════════════════════

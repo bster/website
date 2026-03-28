@@ -29,28 +29,84 @@
     <button class="switcher-btn" data-game="asteroids">CV Asteroids</button>
     <span class="switcher-sep">/</span>
     <button class="switcher-btn" data-game="pacman">CV Pac-Man</button>
+    <span class="switcher-sep">/</span>
+    <button class="switcher-btn" data-game="leaderboard" id="lb-switcher-btn">Leaderboard</button>
   </nav>
+
+  <!-- Score submission modal -->
+  <div id="score-modal" role="dialog" aria-modal="true" aria-label="Submit your score">
+    <div class="score-modal-box">
+      <p class="modal-game-label" id="modal-game-name"></p>
+      <p class="modal-score-line">Score: <strong id="modal-score-val"></strong></p>
+      <label for="player-name">Your name</label>
+      <input id="player-name" type="text" maxlength="32" placeholder="Enter your name" autocomplete="off" />
+      <div class="score-modal-actions">
+        <button id="modal-submit">Submit</button>
+        <button id="modal-skip" class="btn-secondary">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard overlay -->
+  <div id="leaderboard-view" role="dialog" aria-modal="true" aria-label="Leaderboard">
+    <div class="lb-inner">
+      <div class="lb-header">
+        <h2>Leaderboard</h2>
+        <button id="lb-close" aria-label="Close leaderboard">&#x2715;</button>
+      </div>
+      <div class="lb-game-tabs">
+        <button class="lb-tab active" data-game="breaker">CV Breaker</button>
+        <button class="lb-tab" data-game="asteroids">CV Asteroids</button>
+        <button class="lb-tab" data-game="pacman">CV Pac-Man</button>
+      </div>
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="lb-tbody"></tbody>
+      </table>
+    </div>
+  </div>
 
   <script src="layout.js"></script>
   <script src="game.js"></script>
   <script src="asteroids.js"></script>
   <script src="pacman.js"></script>
+  <script src="leaderboard.js"></script>
   <script>
-    const stopFns  = { breaker: stopBreaker,  asteroids: stopAsteroids,  pacman: stopPacman  };
+    const stopFns  = { breaker: stopBreaker, asteroids: stopAsteroids, pacman: stopPacman };
     const startFns = { breaker: startBreaker, asteroids: startAsteroids, pacman: startPacman };
-    let currentGame = 'breaker';
-    startBreaker();
+    let currentGame = null;
+
+    function switchToGame(game) {
+      if (currentGame && currentGame !== 'leaderboard') stopFns[currentGame]();
+      if (currentGame === 'leaderboard') hideLeaderboard();
+      document.querySelectorAll('.switcher-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.game === game));
+      currentGame = game;
+      if (game === 'leaderboard') {
+        showLeaderboard();
+      } else {
+        startFns[game]();
+      }
+    }
+
     document.querySelectorAll('.switcher-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const game = btn.dataset.game;
-        if (game === currentGame) return;
-        stopFns[currentGame]();
-        document.querySelectorAll('.switcher-btn').forEach(b =>
-          b.classList.toggle('active', b === btn));
-        currentGame = game;
-        startFns[game]();
+        if (btn.dataset.game === currentGame) return;
+        switchToGame(btn.dataset.game);
       });
     });
+
+    async function boot() {
+      await loadCV();
+      switchToGame('breaker');
+    }
+    boot();
   </script>
 </body>
 </html>
