@@ -30,8 +30,10 @@ const A_INVINCIBLE_F = 180;
 const A_DEAD_DELAY   = 90;
 
 /* ── State ────────────────────────────────────────────────────────── */
-let aChars     = [];
-let aDividers  = [];
+let aChars        = [];
+let aDividers     = [];
+let aContentLeft  = 0;
+let aContentRight = 0;
 let aDeadChars = [];
 let aParticles = [];
 let aBullets   = [];
@@ -53,9 +55,11 @@ let aTouchCurrent = null;
    LAYOUT
    ═══════════════════════════════════════════════════════════════════ */
 function aBuildLayout() {
-  const data = buildLayoutData(ctx, W, H);
-  aChars    = data.chars;
-  aDividers = data.dividers;
+  const data    = buildLayoutData(ctx, W, H);
+  aChars        = data.chars;
+  aDividers     = data.dividers;
+  aContentLeft  = data.contentLeft;
+  aContentRight = data.contentRight;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -504,6 +508,14 @@ function aLoop() {
       aShip.y = Math.max(0, Math.min(H, aShip.y));
     }
   }
+
+  // Reflow CV text around the ship each frame
+  const aObstacles = [];
+  if (aShip && aPhase === 'playing') {
+    aObstacles.push({ cx: aShip.x, cy: aShip.y, r: A_SHIP_SIZE + 36, hPad: 18, vPad: 6 });
+  }
+  reflowChars(aChars, aObstacles, aContentLeft, aContentRight);
+
   aUpdate();
   aDraw();
   aAnimId = requestAnimationFrame(aLoop);

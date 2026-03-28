@@ -21,7 +21,7 @@ const P_SPEED        = 2.2;
 const P_GHOST_SPEED  = 1.35;
 const P_PAC_RADIUS   = 12;
 const P_GHOST_RADIUS = 13;
-const P_EAT_RADIUS   = 10;
+const P_EAT_RADIUS   = P_PAC_RADIUS + 30;  // eat at reflow boundary
 const P_INVINCIBLE_F = 150;
 const P_DEAD_DELAY   = 100;
 
@@ -33,8 +33,10 @@ const P_DIRS = {
 };
 
 /* ── State ────────────────────────────────────────────────────────── */
-let pChars     = [];
-let pDividers  = [];
+let pChars        = [];
+let pDividers     = [];
+let pContentLeft  = 0;
+let pContentRight = 0;
 let pEaten     = [];    // fading-out eaten chars
 let pParticles = [];
 let pPac       = null;
@@ -52,9 +54,11 @@ let pTouchStart = null;
    LAYOUT
    ═══════════════════════════════════════════════════════════════════ */
 function pBuildLayout() {
-  const data = buildLayoutData(ctx, W, H);
-  pChars    = data.chars;
-  pDividers = data.dividers;
+  const data    = buildLayoutData(ctx, W, H);
+  pChars        = data.chars;
+  pDividers     = data.dividers;
+  pContentLeft  = data.contentLeft;
+  pContentRight = data.contentRight;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -504,6 +508,17 @@ function pLoop() {
     canvas.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
+
+  // Reflow CV text around Pac-Man and ghosts each frame
+  const pObstacles = [];
+  if (pPac && pPhase === 'playing') {
+    pObstacles.push({ cx: pPac.x, cy: pPac.y, r: P_PAC_RADIUS + 32, hPad: 16, vPad: 6 });
+    for (const g of pGhosts) {
+      pObstacles.push({ cx: g.x, cy: g.y, r: P_GHOST_RADIUS + 22, hPad: 12, vPad: 4 });
+    }
+  }
+  reflowChars(pChars, pObstacles, pContentLeft, pContentRight);
+
   pUpdate();
   pDraw();
   pAnimId = requestAnimationFrame(pLoop);

@@ -229,14 +229,17 @@ function buildLayoutData(ctx, W, H) {
       const cw = ctx.measureText(c).width;
       if (c.trim() !== '') {
         chars.push({
-          char:  c,
-          x:     curX,
-          y:     baseY,
-          w:     cw,
-          h:     style.size,
-          font:  fnt,
-          color: style.color,
-          alive: true,
+          char:   c,
+          x:      curX,
+          y:      baseY,
+          _baseX: curX,
+          _baseY: baseY,
+          _align: align === 'right' ? 'right' : 'left',
+          w:      cw,
+          h:      style.size,
+          font:   fnt,
+          color:  style.color,
+          alive:  true,
         });
       }
       curX += cw + spacing;
@@ -303,5 +306,5 @@ function buildLayoutData(ctx, W, H) {
   for (const ch of chars)    ch.y += offsetY;
   for (const dv of dividers) dv.y += offsetY;
 
-  return { chars, dividers };
+  return { chars, dividers, contentLeft: lx, contentRight: rx };
 }
