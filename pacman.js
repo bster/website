@@ -500,10 +500,8 @@ function pLoop() {
   const newW = window.innerWidth, newH = window.innerHeight;
   if (newW !== W || newH !== H) {
     W = newW; H = newH;
-    canvas.width        = W * DPR;
-    canvas.height       = H * DPR;
-    canvas.style.width  = W + 'px';
-    canvas.style.height = H + 'px';
+    canvas.width  = W * DPR;
+    canvas.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
   pUpdate();
