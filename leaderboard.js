@@ -28,8 +28,8 @@
       The anon key is safe to expose in client-side JS when RLS is enabled.
    ═══════════════════════════════════════════════════════════════════ */
 
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';   // e.g. https://xyzabc.supabase.co
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://fhoaxqgwkpomkdbmmkhn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Ol8Uz0acbmjJ0kRvRYRHXQ_IGNqdBOQ';
 
 const LB_CONFIGURED = (
   SUPABASE_URL !== 'YOUR_SUPABASE_URL' &&
