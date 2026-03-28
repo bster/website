@@ -27,22 +27,28 @@
     <button class="switcher-btn active" data-game="breaker">CV Breaker</button>
     <span class="switcher-sep">/</span>
     <button class="switcher-btn" data-game="asteroids">CV Asteroids</button>
+    <span class="switcher-sep">/</span>
+    <button class="switcher-btn" data-game="pacman">CV Pac-Man</button>
   </nav>
 
+  <script src="layout.js"></script>
   <script src="game.js"></script>
   <script src="asteroids.js"></script>
+  <script src="pacman.js"></script>
   <script>
+    const stopFns  = { breaker: stopBreaker,  asteroids: stopAsteroids,  pacman: stopPacman  };
+    const startFns = { breaker: startBreaker, asteroids: startAsteroids, pacman: startPacman };
     let currentGame = 'breaker';
     startBreaker();
     document.querySelectorAll('.switcher-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const game = btn.dataset.game;
         if (game === currentGame) return;
-        if (currentGame === 'breaker') stopBreaker(); else stopAsteroids();
+        stopFns[currentGame]();
         document.querySelectorAll('.switcher-btn').forEach(b =>
           b.classList.toggle('active', b === btn));
         currentGame = game;
-        if (game === 'breaker') startBreaker(); else startAsteroids();
+        startFns[game]();
       });
     });
   </script>
