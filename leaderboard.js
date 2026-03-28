@@ -155,6 +155,11 @@ document.getElementById('modal-skip').addEventListener('click', () => {
   hideScoreModal();
 });
 
+// Clicking the backdrop (outside the box) also dismisses
+document.getElementById('score-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('score-modal')) hideScoreModal();
+});
+
 // Submit on Enter key in name field
 document.getElementById('player-name').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('modal-submit').click();

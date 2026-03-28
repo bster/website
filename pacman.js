@@ -379,37 +379,35 @@ function pDraw() {
     }
   }
 
-  // ── HUD: score
-  if (pPhase === 'playing' || pPhase === 'dead') {
-    ctx.save();
-    ctx.font         = `600 12px ${FONT}`;
-    ctx.fillStyle    = 'rgba(0,0,0,0.25)';
-    ctx.textAlign    = 'right';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(pScore.toLocaleString(), W - 20, H - 10);
-    ctx.restore();
-  }
-
-  // ── HUD: lives as small Pac-Man icons top-left
+  // ── HUD: lives + score — top-left
+  const _pHudY = 50;
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 24;
-    const ly = 26;
     const r  = 8;
     ctx.save();
     if (i < pLives) {
       ctx.fillStyle = P_PAC_COLOR;
       ctx.beginPath();
-      ctx.moveTo(lx, ly);
-      ctx.arc(lx, ly, r, 0.25, Math.PI * 2 - 0.25);
+      ctx.moveTo(lx, _pHudY);
+      ctx.arc(lx, _pHudY, r, 0.25, Math.PI * 2 - 0.25);
       ctx.closePath();
       ctx.fill();
     } else {
       ctx.strokeStyle = 'rgba(247,37,133,0.2)';
       ctx.lineWidth   = 1.2;
       ctx.beginPath();
-      ctx.arc(lx, ly, r, 0, Math.PI * 2);
+      ctx.arc(lx, _pHudY, r, 0, Math.PI * 2);
       ctx.stroke();
     }
+    ctx.restore();
+  }
+  if (pPhase === 'playing' || pPhase === 'dead') {
+    ctx.save();
+    ctx.font         = `600 12px ${FONT}`;
+    ctx.fillStyle    = 'rgba(0,0,0,0.25)';
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(pScore.toLocaleString(), 26 + 3 * 24 + 10, _pHudY);
     ctx.restore();
   }
 
