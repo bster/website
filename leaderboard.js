@@ -28,12 +28,10 @@
       The anon key is safe to expose in client-side JS when RLS is enabled.
    ═══════════════════════════════════════════════════════════════════ */
 
-// Credentials are defined in config.js (gitignored). See config.example.js.
-// SUPABASE_URL and SUPABASE_KEY are expected as globals from config.js.
+const SUPABASE_URL = 'https://fhoaxqgwkpomkdbmmkhn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_rAcuBV-cPeigvOfPnummDQ_qg4-4sJL';
 
 const LB_CONFIGURED = (
-  typeof SUPABASE_URL !== 'undefined' &&
-  typeof SUPABASE_KEY !== 'undefined' &&
   SUPABASE_URL !== 'YOUR_SUPABASE_URL' &&
   SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY'
 );
