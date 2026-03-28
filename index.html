@@ -22,6 +22,29 @@
     </a>
   </nav>
 
+  <!-- Game switcher -->
+  <nav class="game-switcher">
+    <button class="switcher-btn active" data-game="breaker">CV Breaker</button>
+    <span class="switcher-sep">/</span>
+    <button class="switcher-btn" data-game="asteroids">CV Asteroids</button>
+  </nav>
+
   <script src="game.js"></script>
+  <script src="asteroids.js"></script>
+  <script>
+    let currentGame = 'breaker';
+    startBreaker();
+    document.querySelectorAll('.switcher-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const game = btn.dataset.game;
+        if (game === currentGame) return;
+        if (currentGame === 'breaker') stopBreaker(); else stopAsteroids();
+        document.querySelectorAll('.switcher-btn').forEach(b =>
+          b.classList.toggle('active', b === btn));
+        currentGame = game;
+        if (game === 'breaker') startBreaker(); else startAsteroids();
+      });
+    });
+  </script>
 </body>
 </html>

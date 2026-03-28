@@ -535,38 +535,52 @@ function loop() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   INPUT
+   INPUT HANDLERS
    ═══════════════════════════════════════════════════════════════════ */
-document.addEventListener('keydown', e => {
+function _bOnKeyDown(e) {
   if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') keys.left  = true;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
-});
-document.addEventListener('keyup', e => {
+}
+function _bOnKeyUp(e) {
   if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') keys.left  = false;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
-});
-
-// Mouse controls paddle position globally (not just within canvas)
-document.addEventListener('mousemove', e => { mouseX = e.clientX; });
-
-canvas.addEventListener('touchmove', e => {
+}
+function _bOnMouseMove(e) { mouseX = e.clientX; }
+function _bOnTouchMove(e) {
   e.preventDefault();
   mouseX = e.touches[0].clientX;
-}, { passive: false });
-canvas.addEventListener('touchend', () => { mouseX = null; });
-
-// Click to restart after clearing
-canvas.addEventListener('click', () => {
-  if (cleared) {
-    buildLayout();
-    initPhysics();
-  }
-});
+}
+function _bOnTouchEnd() { mouseX = null; }
+function _bOnClick() {
+  if (cleared) { buildLayout(); initPhysics(); }
+}
 
 /* ═══════════════════════════════════════════════════════════════════
-   BOOT
+   START / STOP
    ═══════════════════════════════════════════════════════════════════ */
-initCanvas();
-buildLayout();
-initPhysics();
-loop();
+function startBreaker() {
+  initCanvas();
+  buildLayout();
+  initPhysics();
+  document.addEventListener('keydown',   _bOnKeyDown);
+  document.addEventListener('keyup',     _bOnKeyUp);
+  document.addEventListener('mousemove', _bOnMouseMove);
+  canvas.addEventListener('touchmove',   _bOnTouchMove, { passive: false });
+  canvas.addEventListener('touchend',    _bOnTouchEnd);
+  canvas.addEventListener('click',       _bOnClick);
+  loop();
+}
+
+function stopBreaker() {
+  cancelAnimationFrame(animId);
+  animId     = null;
+  keys.left  = false;
+  keys.right = false;
+  mouseX     = null;
+  document.removeEventListener('keydown',   _bOnKeyDown);
+  document.removeEventListener('keyup',     _bOnKeyUp);
+  document.removeEventListener('mousemove', _bOnMouseMove);
+  canvas.removeEventListener('touchmove',   _bOnTouchMove);
+  canvas.removeEventListener('touchend',    _bOnTouchEnd);
+  canvas.removeEventListener('click',       _bOnClick);
+}

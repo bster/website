@@ -42,3 +42,41 @@ html, body {
   width: 18px;
   height: 18px;
 }
+
+/* ── Game switcher ──────────────────────────────────────────────── */
+.game-switcher {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 11px/1 system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.switcher-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1a1a1a;
+  opacity: 0.25;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition: opacity 0.15s;
+}
+
+.switcher-btn:hover  { opacity: 0.55; }
+.switcher-btn.active { opacity: 0.85; font-weight: 600; }
+
+.switcher-sep {
+  color: #1a1a1a;
+  opacity: 0.15;
+  font-size: 10px;
+  user-select: none;
+}
