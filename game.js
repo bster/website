@@ -36,6 +36,7 @@ let ball      = {};
 let paddle    = {};
 let cleared   = false;
 let animId    = null;
+let bStartTime = 0;
 
 const keys    = { left: false, right: false };
 let mouseX    = null;
@@ -88,6 +89,7 @@ function initPhysics() {
   dead      = [];
   particles = [];
   cleared   = false;
+  bStartTime = Date.now();
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -231,7 +233,11 @@ function update() {
   }
 
   // ── Win condition
-  if (chars.every(c => !c.alive)) cleared = true;
+  if (!cleared && chars.every(c => !c.alive)) {
+    cleared = true;
+    const score = calcScore(bStartTime, 0);
+    showScoreModal(score, 'breaker', null);
+  }
 
   // ── Dead chars physics
   for (let i = dead.length - 1; i >= 0; i--) {
@@ -405,7 +411,7 @@ function _bOnTouchMove(e) {
 }
 function _bOnTouchEnd() { mouseX = null; }
 function _bOnClick() {
-  if (cleared) { buildLayout(); initPhysics(); }
+  if (cleared && !window.scoreModalOpen) { buildLayout(); initPhysics(); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
