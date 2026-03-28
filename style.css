@@ -1,16 +1,38 @@
+/* ── Design tokens ─────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+  --page:    #f5f1ea;
+  --panel:   #fffdf8;
+  --ink:     #1e1a18;
+  --muted:   #6d645d;
+  --rule:    #d8cec3;
+  --accent:  #955f3b;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #f7f6f3;
+  background: var(--page);
 }
 
 #cv-canvas {
   display: block;
   width: 100vw;
   height: 100vh;
+}
+
+/* ── Atmosphere — subtle radial gradient for depth ─────────────── */
+.atmosphere {
+  position: fixed;
+  inset: -10%;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(60% 52% at 14% 80%, rgba(45, 88, 128, 0.035), transparent 68%),
+    radial-gradient(55% 46% at 88% 14%, rgba(217, 119, 87, 0.04), transparent 68%);
 }
 
 /* ── Fixed corner links ─────────────────────────────────────────── */
@@ -31,65 +53,76 @@ html, body {
 .corner-links a {
   display: flex;
   align-items: center;
-  color: #333;
+  color: var(--muted);
   text-decoration: none;
-  transition: color 0.15s;
+  transition: color 160ms ease;
 }
 
-.corner-links a:hover { color: #000; }
+.corner-links a:hover { color: var(--ink); }
 
 .corner-links svg {
   width: 18px;
   height: 18px;
 }
 
-/* ── Game switcher ──────────────────────────────────────────────── */
+/* ── Game switcher — floating pill bar ─────────────────────────── */
 .game-switcher {
   position: fixed;
-  top: 20px;
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font: 11px/1 system-ui, -apple-system, sans-serif;
-  letter-spacing: 0.06em;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 92%, white 8%);
+  border: 1px solid var(--rule);
+  box-shadow: 0 12px 32px rgb(54 40 23 / 0.06);
+  font: 500 10.5px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 @media (max-width: 700px) {
   .game-switcher {
-    font-size: 9px;
-    gap: 4px;
-    letter-spacing: 0.03em;
+    font-size: 8.5px;
+    gap: 1px;
+    padding: 4px;
   }
 }
 
 .switcher-btn {
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
-  color: #1a1a1a;
-  opacity: 0.25;
-  padding: 0;
+  color: var(--muted);
+  padding: 7px 14px;
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
-  transition: opacity 0.15s;
+  transition: all 160ms ease;
   white-space: nowrap;
   word-break: keep-all;
+  border-radius: 999px;
 }
 
-.switcher-btn:hover  { opacity: 0.55; }
-.switcher-btn.active { opacity: 0.85; font-weight: 600; }
+.switcher-btn:hover {
+  color: var(--ink);
+  background: rgba(0,0,0,0.035);
+}
 
-.switcher-sep {
-  color: #1a1a1a;
-  opacity: 0.15;
-  font-size: 10px;
-  user-select: none;
+.switcher-btn.active {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--page);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.07);
+}
+
+@media (max-width: 700px) {
+  .switcher-btn { padding: 6px 10px; }
 }
 
 /* ── Score modal ────────────────────────────────────────────────── */
@@ -98,8 +131,8 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(247,246,243,0.82);
-  backdrop-filter: blur(4px);
+  background: rgba(245,241,234,0.82);
+  backdrop-filter: blur(6px);
   align-items: center;
   justify-content: center;
 }
@@ -109,9 +142,9 @@ html, body {
 }
 
 .score-modal-box {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 10px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 18px;
   padding: 32px 36px;
   min-width: 280px;
   max-width: 360px;
@@ -119,44 +152,44 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  box-shadow: 0 18px 40px rgb(54 40 23 / 0.08);
 }
 
 .modal-game-label {
-  font: 700 10px/1 system-ui, -apple-system, sans-serif;
-  letter-spacing: 0.1em;
+  font: 600 10px/1 "SF Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #b8b8b8;
+  color: var(--accent);
 }
 
 .modal-score-line {
-  font: 400 15px/1.4 system-ui, -apple-system, sans-serif;
-  color: #2d2d2d;
+  font: 400 15px/1.4 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--muted);
 }
 
 .modal-score-line strong {
   font-weight: 700;
-  color: #0a0a0a;
+  color: var(--ink);
 }
 
 .score-modal-box label {
-  font: 400 12px/1 system-ui, -apple-system, sans-serif;
-  color: #9a9a9a;
+  font: 400 12px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--muted);
 }
 
 #player-name {
   width: 100%;
-  border: 1px solid rgba(0,0,0,0.14);
-  border-radius: 6px;
-  padding: 9px 12px;
-  font: 400 14px/1 system-ui, -apple-system, sans-serif;
-  color: #0a0a0a;
-  background: #fafafa;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: 400 14px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  background: var(--panel);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 160ms ease;
 }
 
-#player-name:focus { border-color: rgba(0,0,0,0.35); }
+#player-name:focus { border-color: var(--accent); }
 
 .score-modal-actions {
   display: flex;
@@ -166,40 +199,45 @@ html, body {
 
 .score-modal-actions button {
   flex: 1;
-  padding: 10px 0;
+  padding: 11px 0;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font: 600 12px/1 system-ui, -apple-system, sans-serif;
+  font: 600 11px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  transition: opacity 0.15s;
+  transition: all 160ms ease;
 }
 
 #modal-submit {
-  background: #0a0a0a;
-  color: #fff;
+  background: var(--ink);
+  color: var(--panel);
 }
 
-#modal-submit:hover  { opacity: 0.78; }
+#modal-submit:hover  { opacity: 0.82; }
 #modal-submit:disabled { opacity: 0.35; cursor: default; }
 
 .btn-secondary {
-  background: rgba(0,0,0,0.06);
-  color: #555;
+  background: rgba(30,26,24,0.06);
+  color: var(--muted);
 }
 
-.btn-secondary:hover { opacity: 0.7; }
+.btn-secondary:hover { background: rgba(30,26,24,0.1); }
 
 .modal-contact {
-  font: 400 11px/1 system-ui, -apple-system, sans-serif;
-  color: #c5c5c5;
+  font: 400 11px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--rule);
   text-align: center;
   margin-top: 4px;
 }
 
-.modal-contact a { color: #9a9a9a; text-decoration: none; }
-.modal-contact a:hover { color: #2d2d2d; }
+.modal-contact a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.modal-contact a:hover { color: var(--accent); }
 
 /* ── Leaderboard overlay ────────────────────────────────────────── */
 #leaderboard-view {
@@ -207,7 +245,7 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: #f7f6f3;
+  background: var(--page);
   align-items: flex-start;
   justify-content: center;
   padding-top: 64px;
@@ -232,8 +270,8 @@ html, body {
 }
 
 .lb-header h2 {
-  font: 700 22px/1 system-ui, -apple-system, sans-serif;
-  color: #0a0a0a;
+  font: 700 24px/1 Georgia, "Times New Roman", serif;
+  color: var(--ink);
 }
 
 #lb-close {
@@ -241,12 +279,12 @@ html, body {
   border: none;
   cursor: pointer;
   font-size: 16px;
-  color: #9a9a9a;
+  color: var(--muted);
   padding: 4px;
-  transition: color 0.15s;
+  transition: color 160ms ease;
 }
 
-#lb-close:hover { color: #0a0a0a; }
+#lb-close:hover { color: var(--ink); }
 
 .lb-game-tabs {
   display: flex;
@@ -256,53 +294,58 @@ html, body {
 
 .lb-tab {
   background: none;
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 20px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
   padding: 6px 14px;
   cursor: pointer;
-  font: 400 11px/1 system-ui, -apple-system, sans-serif;
-  letter-spacing: 0.05em;
+  font: 500 10px/1 "SF Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #6a6a6a;
-  transition: all 0.15s;
+  color: var(--muted);
+  transition: all 160ms ease;
 }
 
-.lb-tab:hover  { border-color: rgba(0,0,0,0.3); color: #1a1a1a; }
-.lb-tab.active { background: #0a0a0a; border-color: #0a0a0a; color: #fff; font-weight: 600; }
+.lb-tab:hover  { border-color: var(--accent); color: var(--ink); }
+.lb-tab.active { background: var(--ink); border-color: var(--ink); color: var(--panel); font-weight: 600; }
 
 .lb-table {
   width: 100%;
   border-collapse: collapse;
-  font: 400 13px/1.6 system-ui, -apple-system, sans-serif;
+  font: 400 13px/1.6 "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .lb-table thead th {
   text-align: left;
-  font: 700 10px/1 system-ui, -apple-system, sans-serif;
+  font: 600 9px/1 "SF Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #b8b8b8;
+  color: var(--rule);
   padding: 0 0 10px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid var(--rule);
 }
 
 .lb-table thead th:last-child { text-align: right; }
 
 .lb-table tbody tr:not(:last-child) td {
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(216,206,195,0.4);
 }
 
 .lb-table td {
   padding: 10px 0;
-  color: #2d2d2d;
+  color: var(--muted);
 }
 
-.lb-rank  { color: #c5c5c5; width: 32px; }
-.lb-score { text-align: right; font-weight: 600; color: #0a0a0a; }
+.lb-rank  { color: var(--rule); width: 32px; }
+.lb-score { text-align: right; font-weight: 600; color: var(--ink); }
 
 .lb-loading {
   text-align: center;
-  color: #b8b8b8;
+  color: var(--rule);
   padding: 24px 0;
   font-size: 12px;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
 }

@@ -9,14 +9,14 @@ const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, s
 
 // Each style: { weight, size (px), color }
 const S = {
-  name:    { weight: 700, size: 44,  color: '#0a0a0a' },
-  title:   { weight: 400, size: 16,  color: '#2d2d2d' },
-  meta:    { weight: 400, size: 12,  color: '#9a9a9a' },
-  section: { weight: 700, size: 10,  color: '#b8b8b8' },
-  org:     { weight: 600, size: 14,  color: '#111111' },
-  role:    { weight: 400, size: 13,  color: '#4a4a4a' },
-  detail:  { weight: 400, size: 11,  color: '#8a8a8a' },
-  period:  { weight: 400, size: 12,  color: '#c5c5c5' },
+  name:    { weight: 700, size: 44,  color: '#1e1a18' },
+  title:   { weight: 400, size: 16,  color: '#2a241f' },
+  meta:    { weight: 400, size: 12,  color: '#8a8178' },
+  section: { weight: 700, size: 10,  color: '#b4a99e' },
+  org:     { weight: 600, size: 14,  color: '#1e1a18' },
+  role:    { weight: 400, size: 13,  color: '#4f463b' },
+  detail:  { weight: 400, size: 11,  color: '#7d756c' },
+  period:  { weight: 400, size: 12,  color: '#bfb5aa' },
 };
 
 function makeFont(s) { return `${s.weight} ${s.size}px ${FONT}`; }

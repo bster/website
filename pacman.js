@@ -12,10 +12,10 @@
    ─────────────────────────────────────────────────────────────────── */
 
 /* ── Constants ───────────────────────────────────────────────────── */
-const P_BG           = '#f7f6f3';
+const P_BG           = '#f5f1ea';
 const P_DIV_COLOR    = 'rgba(0,0,0,0.1)';
 const P_PAC_COLOR    = '#f72585';
-const P_GHOST_COLORS = ['#1a1a1a', '#5a5a5a', '#9a9a9a'];
+const P_GHOST_COLORS = ['#1e1a18', '#5a5149', '#8a8178'];
 
 const P_SPEED        = 2.2;
 const P_GHOST_SPEED  = 1.35;
@@ -414,29 +414,29 @@ function pDraw() {
   // ── Overlays
   if (pPhase === 'cleared' || pPhase === 'gameover') {
     ctx.save();
-    ctx.fillStyle    = 'rgba(247,246,243,0.94)';
+    ctx.fillStyle    = 'rgba(245,241,234,0.94)';
     ctx.fillRect(0, 0, W, H);
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
 
     if (pPhase === 'cleared') {
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#1e1a18';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('All cleared. Hire me anyway?', W / 2, H / 2 - 20);
-      ctx.fillStyle = '#9a9a9a';
+      ctx.fillStyle = '#8a8178';
       ctx.font      = `400 13px ${FONT}`;
       ctx.fillText('benjamin.m.stern@gmail.com', W / 2, H / 2 + 14);
-      ctx.fillStyle = '#c5c5c5';
+      ctx.fillStyle = '#bfb5aa';
       ctx.font      = `400 11px ${FONT}`;
       ctx.fillText('click to play again', W / 2, H / 2 + 38);
     } else {
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#1e1a18';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('Game over.', W / 2, H / 2 - 20);
-      ctx.fillStyle = '#9a9a9a';
+      ctx.fillStyle = '#8a8178';
       ctx.font      = `400 13px ${FONT}`;
       ctx.fillText(`Score: ${pScore.toLocaleString()}`, W / 2, H / 2 + 14);
-      ctx.fillStyle = '#c5c5c5';
+      ctx.fillStyle = '#bfb5aa';
       ctx.font      = `400 11px ${FONT}`;
       ctx.fillText('click to play again', W / 2, H / 2 + 38);
     }
@@ -472,7 +472,7 @@ function _pDrawGhost(x, y, r, color) {
   const eyeRY   = r * 0.28;
 
   // White of eyes
-  ctx.fillStyle = 'rgba(247,246,243,0.9)';
+  ctx.fillStyle = 'rgba(245,241,234,0.9)';
   ctx.beginPath();
   ctx.ellipse(x - eyeOffX, y - eyeOffY, eyeRX, eyeRY, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -481,7 +481,7 @@ function _pDrawGhost(x, y, r, color) {
   ctx.fill();
 
   // Pupils
-  ctx.fillStyle = '#1a1a1a';
+  ctx.fillStyle = '#1e1a18';
   const pupilR = r * 0.1;
   ctx.beginPath();
   ctx.arc(x - eyeOffX + eyeRX * 0.25, y - eyeOffY, pupilR, 0, Math.PI * 2);
@@ -500,10 +500,8 @@ function pLoop() {
   const newW = window.innerWidth, newH = window.innerHeight;
   if (newW !== W || newH !== H) {
     W = newW; H = newH;
-    canvas.width        = W * DPR;
-    canvas.height       = H * DPR;
-    canvas.style.width  = W + 'px';
-    canvas.style.height = H + 'px';
+    canvas.width  = W * DPR;
+    canvas.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
   pUpdate();
