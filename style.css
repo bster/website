@@ -59,7 +59,7 @@ html, body {
   white-space: nowrap;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 700px) {
   .game-switcher {
     font-size: 9px;
     gap: 4px;
@@ -78,6 +78,8 @@ html, body {
   letter-spacing: inherit;
   text-transform: inherit;
   transition: opacity 0.15s;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .switcher-btn:hover  { opacity: 0.55; }
@@ -188,6 +190,16 @@ html, body {
 }
 
 .btn-secondary:hover { opacity: 0.7; }
+
+.modal-contact {
+  font: 400 11px/1 system-ui, -apple-system, sans-serif;
+  color: #c5c5c5;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.modal-contact a { color: #9a9a9a; text-decoration: none; }
+.modal-contact a:hover { color: #2d2d2d; }
 
 /* ── Leaderboard overlay ────────────────────────────────────────── */
 #leaderboard-view {

@@ -363,7 +363,7 @@ function pDraw() {
   // ── Pac-Man
   if (pPac && pPhase === 'playing') {
     const pac     = pPac;
-    const visible = !pac.invincible || Math.floor(Date.now() / 80) % 2 === 0;
+    const visible = true;
     if (visible) {
       const dirAngles = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
       const baseAngle = dirAngles[pac.dir] || 0;

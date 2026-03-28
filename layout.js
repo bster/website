@@ -198,7 +198,7 @@ function buildLayoutData(ctx, W, H) {
   const dividers = [];
 
   // Proportional scaling for narrow screens so fonts and spacing shrink together
-  const SCALE = Math.min(1, Math.max(0.78, W / 680));
+  const SCALE = Math.min(1, Math.max(0.72, W / 900));
   const sc    = n => Math.round(n * SCALE);
 
   // Return a scaled copy of a style token

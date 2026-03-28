@@ -394,7 +394,7 @@ function aDraw() {
   // ── Ship
   if (aShip && aPhase === 'playing') {
     const ship    = aShip;
-    const visible = !ship.invincible || Math.floor(Date.now() / 80) % 2 === 0;
+    const visible = true;
     if (visible) {
       ctx.save();
       ctx.translate(ship.x, ship.y);
