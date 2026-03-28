@@ -493,6 +493,19 @@ function aDraw() {
    LOOP
    ═══════════════════════════════════════════════════════════════════ */
 function aLoop() {
+  const newW = window.innerWidth, newH = window.innerHeight;
+  if (newW !== W || newH !== H) {
+    W = newW; H = newH;
+    canvas.width        = W * DPR;
+    canvas.height       = H * DPR;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (aShip) {
+      aShip.x = Math.max(0, Math.min(W, aShip.x));
+      aShip.y = Math.max(0, Math.min(H, aShip.y));
+    }
+  }
   aUpdate();
   aDraw();
   aAnimId = requestAnimationFrame(aLoop);

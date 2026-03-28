@@ -103,18 +103,6 @@
       });
     });
 
-    // Restart current game on window resize so canvas dimensions stay correct
-    let _resizeTimer = null;
-    window.addEventListener('resize', () => {
-      clearTimeout(_resizeTimer);
-      _resizeTimer = setTimeout(() => {
-        if (currentGame && currentGame !== 'leaderboard') {
-          stopFns[currentGame]();
-          startFns[currentGame]();
-        }
-      }, 250);
-    });
-
     async function boot() {
       await loadCV();
       switchToGame('breaker');

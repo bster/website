@@ -497,6 +497,15 @@ function _pDrawGhost(x, y, r, color) {
    LOOP
    ═══════════════════════════════════════════════════════════════════ */
 function pLoop() {
+  const newW = window.innerWidth, newH = window.innerHeight;
+  if (newW !== W || newH !== H) {
+    W = newW; H = newH;
+    canvas.width        = W * DPR;
+    canvas.height       = H * DPR;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
   pUpdate();
   pDraw();
   pAnimId = requestAnimationFrame(pLoop);

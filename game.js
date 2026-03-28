@@ -448,6 +448,25 @@ function pillRect(x, y, w, h) {
    LOOP
    ═══════════════════════════════════════════════════════════════════ */
 function loop() {
+  // Smooth canvas resize — runs inline each frame so there's no debounce delay
+  const newW = window.innerWidth, newH = window.innerHeight;
+  if (newW !== W || newH !== H) {
+    W = newW; H = newH;
+    canvas.width        = W * DPR;
+    canvas.height       = H * DPR;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    paddle.y = H - 44;
+    paddle.x = Math.min(paddle.x, W - paddle.w);
+    if (!bLaunched) {
+      ball.x = paddle.x + paddle.w / 2;
+      ball.y = paddle.y - ball.r - 2;
+    } else {
+      ball.x = Math.max(ball.r, Math.min(W - ball.r, ball.x));
+      ball.y = Math.max(ball.r, Math.min(H - ball.r, ball.y));
+    }
+  }
   update();
   draw();
   animId = requestAnimationFrame(loop);
