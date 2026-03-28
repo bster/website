@@ -25,9 +25,9 @@
 
   <!-- Game switcher -->
   <nav class="game-switcher">
-    <button class="switcher-btn active" data-game="breaker">CV Breaker</button>
-    <button class="switcher-btn" data-game="asteroids">CV Asteroids</button>
-    <button class="switcher-btn" data-game="pacman">CV Pac-Man</button>
+    <button class="switcher-btn active" data-game="pacman">Pac-Man</button>
+    <button class="switcher-btn" data-game="asteroids">Asteroids</button>
+    <button class="switcher-btn" data-game="breaker">Breaker</button>
     <button class="switcher-btn" data-game="leaderboard" id="lb-switcher-btn">Leaderboard</button>
   </nav>
 
@@ -54,9 +54,9 @@
         <button id="lb-close" aria-label="Close leaderboard">&#x2715;</button>
       </div>
       <div class="lb-game-tabs">
-        <button class="lb-tab active" data-game="breaker">CV Breaker</button>
-        <button class="lb-tab" data-game="asteroids">CV Asteroids</button>
-        <button class="lb-tab" data-game="pacman">CV Pac-Man</button>
+        <button class="lb-tab active" data-game="breaker">Breaker</button>
+        <button class="lb-tab" data-game="asteroids">Asteroids</button>
+        <button class="lb-tab" data-game="pacman">Pac-Man</button>
       </div>
       <table class="lb-table">
         <thead>
@@ -104,7 +104,7 @@
 
     async function boot() {
       await loadCV();
-      switchToGame('breaker');
+      switchToGame('pacman');
     }
     boot();
   </script>
