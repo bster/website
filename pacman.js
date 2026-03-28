@@ -21,7 +21,7 @@ const P_SPEED        = 2.2;
 const P_GHOST_SPEED  = 1.35;
 const P_PAC_RADIUS   = 12;
 const P_GHOST_RADIUS = 13;
-const P_EAT_RADIUS   = P_PAC_RADIUS + 30;  // eat at reflow boundary
+const P_EAT_RADIUS   = P_PAC_RADIUS + 6;   // eat at reflow boundary
 const P_INVINCIBLE_F = 150;
 const P_DEAD_DELAY   = 100;
 
@@ -512,9 +512,9 @@ function pLoop() {
   // Reflow CV text around Pac-Man and ghosts each frame
   const pObstacles = [];
   if (pPac && pPhase === 'playing') {
-    pObstacles.push({ cx: pPac.x, cy: pPac.y, r: P_PAC_RADIUS + 32, hPad: 16, vPad: 6 });
+    pObstacles.push({ cx: pPac.x, cy: pPac.y, r: P_PAC_RADIUS + 8, hPad: 5, vPad: 2 });
     for (const g of pGhosts) {
-      pObstacles.push({ cx: g.x, cy: g.y, r: P_GHOST_RADIUS + 22, hPad: 12, vPad: 4 });
+      pObstacles.push({ cx: g.x, cy: g.y, r: P_GHOST_RADIUS + 6, hPad: 4, vPad: 2 });
     }
   }
   reflowChars(pChars, pObstacles, pContentLeft, pContentRight);

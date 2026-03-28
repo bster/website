@@ -512,7 +512,7 @@ function aLoop() {
   // Reflow CV text around the ship each frame
   const aObstacles = [];
   if (aShip && aPhase === 'playing') {
-    aObstacles.push({ cx: aShip.x, cy: aShip.y, r: A_SHIP_SIZE + 36, hPad: 18, vPad: 6 });
+    aObstacles.push({ cx: aShip.x, cy: aShip.y, r: A_SHIP_SIZE + 10, hPad: 6, vPad: 2 });
   }
   reflowChars(aChars, aObstacles, aContentLeft, aContentRight);
 

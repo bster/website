@@ -106,25 +106,50 @@ function reflowChars(chars, obstacles, contentLeft, contentRight) {
 
     const base = { left: contentLeft, right: contentRight };
 
-    // ── Left-aligned chars — flow left-to-right into available slots
+    // ── Left-aligned chars — flow left-to-right into available slots,
+    //    preserving inter-word gaps from the base layout
     if (line.left.length > 0) {
       line.left.sort((a, b) => a._baseX - b._baseX);
       const slots = carveSlots(base, blocked);
 
-      if (slots.length === 0) {
-        // Fully blocked — leave at base position (still hittable)
-      } else {
+      if (slots.length > 0) {
+        // Group consecutive chars into words, recording the gap before each word
+        const words = [];
+        let prevRight = -Infinity;
+        let cur = [];
+        for (const ch of line.left) {
+          const gap = ch._baseX - prevRight;
+          if (gap > 0.5 && cur.length > 0) {
+            words.push({ chars: cur, gapBefore: Math.max(0, gap) });
+            cur = [];
+          }
+          cur.push(ch);
+          prevRight = ch._baseX + ch.w;
+        }
+        if (cur.length > 0) words.push({ chars: cur, gapBefore: 0 });
+
         let sIdx = 0;
         let curX = slots[0].left;
-        for (const ch of line.left) {
-          // Advance to next slot when current is full
-          while (sIdx < slots.length && curX + ch.w > slots[sIdx].right + 0.5) {
+        let firstInSlot = true;
+
+        for (const word of words) {
+          const wordW = word.chars.reduce((s, c) => s + c.w, 0);
+          const gap   = firstInSlot ? 0 : word.gapBefore;
+
+          // Advance slot if word doesn't fit
+          while (sIdx < slots.length && curX + gap + wordW > slots[sIdx].right + 0.5) {
             sIdx++;
-            if (sIdx < slots.length) curX = slots[sIdx].left;
+            if (sIdx < slots.length) { curX = slots[sIdx].left; firstInSlot = true; }
           }
-          if (sIdx >= slots.length) break; // leave remaining at base
-          ch.x = curX;
-          curX += ch.w;
+          if (sIdx >= slots.length) break;
+
+          curX += firstInSlot ? 0 : gap;
+          firstInSlot = false;
+
+          for (const ch of word.chars) {
+            ch.x = curX;
+            curX += ch.w;
+          }
         }
       }
     }
