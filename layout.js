@@ -197,18 +197,25 @@ function buildLayoutData(ctx, W, H) {
   const chars    = [];
   const dividers = [];
 
-  const contentW = Math.min(680, W - 80);
+  // Proportional scaling for narrow screens so fonts and spacing shrink together
+  const SCALE = Math.min(1, Math.max(0.72, W / 900));
+  const sc    = n => Math.round(n * SCALE);
+
+  // Return a scaled copy of a style token
+  function ss(style) { return { ...style, size: sc(style.size) }; }
+
+  const contentW = Math.min(680, W - 48);
   const lx       = (W - contentW) / 2;
   const rx       = lx + contentW;
 
   let y = 0;
 
-  function addText(text, baseX, baseY, style, align, spacing) {
+  function addText(text, baseX, baseY, style, align, spacing, uppercase) {
     align   = align   || 'left';
     spacing = spacing || 0;
+    const str = uppercase ? text.toUpperCase() : text;
     const fnt = makeFont(style);
     ctx.font  = fnt;
-    const str = (style === S.section) ? text.toUpperCase() : text;
 
     let curX = baseX;
     if (align === 'right') {
@@ -239,64 +246,60 @@ function buildLayoutData(ctx, W, H) {
   const d = CV_DATA;
 
   // ── Name
-  addText(d.name, lx, y, S.name);
-  y += 54;
+  addText(d.name, lx, y, ss(S.name));
+  y += sc(54);
 
   // ── Current title
-  addText(d.title, lx, y, S.title);
-  y += 22;
+  addText(d.title, lx, y, ss(S.title));
+  y += sc(22);
 
   // ── Meta line
-  addText(d.meta, lx, y, S.meta);
-  y += 30;
+  addText(d.meta, lx, y, ss(S.meta));
+  y += sc(30);
 
   // ── Divider
   dividers.push({ x: lx, y, w: contentW });
-  y += 22;
+  y += sc(22);
 
   for (const section of d.sections) {
     // ── Section heading
-    addText(section.heading, lx, y, S.section, 'left', 1.5);
-    y += 26;
+    addText(section.heading, lx, y, ss(S.section), 'left', 1.5, true);
+    y += sc(26);
 
     for (const entry of section.entries) {
       if ('org' in entry) {
-        // Org/period/role/details entry
-        addText(entry.org, lx, y, S.org);
-        if (entry.period) addText(entry.period, rx, y, S.period, 'right');
-        y += 20;
+        addText(entry.org, lx, y, ss(S.org));
+        if (entry.period) addText(entry.period, rx, y, ss(S.period), 'right');
+        y += sc(20);
         if (entry.role) {
-          addText(entry.role, lx, y, S.role);
-          y += 17;
+          addText(entry.role, lx, y, ss(S.role));
+          y += sc(17);
         }
         for (const det of entry.details) {
-          addText(det, lx, y, S.detail);
-          y += 17;
+          addText(det, lx, y, ss(S.detail));
+          y += sc(17);
         }
-        // Remove trailing role/detail spacing, add entry gap
-        if (entry.role || entry.details.length) y += 9;
-        else y += 6;
+        if (entry.role || entry.details.length) y += sc(9);
+        else y += sc(6);
       } else {
-        // Plain text entry
-        addText(entry.text, lx, y, entry.detail ? S.detail : S.role);
-        y += entry.detail ? 16 : 18;
+        addText(entry.text, lx, y, ss(entry.detail ? S.detail : S.role));
+        y += entry.detail ? sc(16) : sc(18);
       }
     }
 
-    y += 4; // a little extra before the divider
+    y += sc(4);
 
-    // ── Divider after section (except last)
     dividers.push({ x: lx, y, w: contentW });
-    y += 22;
+    y += sc(22);
   }
 
   // Remove the trailing divider (added after last section)
   dividers.pop();
 
-  const contentH = y + 20;
+  const contentH = y + sc(20);
 
-  // Center content vertically, with extra top padding for the switcher
-  const offsetY = Math.max(80, (H - contentH) / 2);
+  // Center content vertically; minimum offset must clear the HUD at y≈50
+  const offsetY = Math.max(110, (H - contentH) / 2);
   for (const ch of chars)    ch.y += offsetY;
   for (const dv of dividers) dv.y += offsetY;
 

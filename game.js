@@ -39,6 +39,7 @@ let paddle     = {};
 let bPhase     = 'playing';   // 'playing' | 'cleared' | 'gameover'
 let bLives     = B_LIVES_MAX;
 let bScore     = 0;
+let bLaunched  = false;       // false = ball sitting on paddle waiting for click
 let animId     = null;
 let bStartTime = 0;
 
@@ -93,18 +94,17 @@ function initPhysics() {
   bPhase    = 'playing';
   bLives    = B_LIVES_MAX;
   bScore    = 0;
+  bLaunched = false;
   bStartTime = Date.now();
 }
 
-/* ── Relaunch after losing a life ───────────────────────────────── */
-function bRelaunching() {
-  ball.x     = paddle.x + paddle.w / 2;
-  ball.y     = paddle.y - ball.r - 2;
-  ball.trail = [];
-  const a    = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 4);
-  ball.vx    = Math.cos(a) * BALL_SPEED;
-  ball.vy    = Math.sin(a) * BALL_SPEED;
+/* ── Launch ball from paddle ────────────────────────────────────── */
+function bLaunch() {
+  const a = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 3);
+  ball.vx   = Math.cos(a) * BALL_SPEED;
+  ball.vy   = Math.sin(a) * BALL_SPEED;
   enforceMinVY();
+  bLaunched = true;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -183,6 +183,14 @@ function update() {
   }
   paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
 
+  // ── Ball sits on paddle until launched
+  if (!bLaunched) {
+    ball.x     = paddle.x + paddle.w / 2;
+    ball.y     = paddle.y - ball.r - 2;
+    ball.trail = [];
+    return;
+  }
+
   // ── Ball trail
   ball.trail.unshift({ x: ball.x, y: ball.y });
   if (ball.trail.length > 8) ball.trail.pop();
@@ -205,7 +213,8 @@ function update() {
       showScoreModal(bScore, 'breaker', null);
       return;
     }
-    bRelaunching();
+    bLaunched  = false;
+    ball.trail = [];
   }
 
   // ── Paddle collision
@@ -360,6 +369,17 @@ function draw() {
   ctx.fill();
   ctx.restore();
 
+  // ── Launch hint
+  if (!bLaunched && bPhase === 'playing') {
+    ctx.save();
+    ctx.font         = `400 12px ${FONT}`;
+    ctx.fillStyle    = 'rgba(0,0,0,0.28)';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('click to launch', W / 2, paddle.y - 22);
+    ctx.restore();
+  }
+
   // ── HUD: lives (small balls) + score — top-left
   if (bPhase === 'playing') {
     const ly = 50;
@@ -449,8 +469,17 @@ function _bOnTouchMove(e) {
   e.preventDefault();
   mouseX = e.touches[0].clientX;
 }
-function _bOnTouchEnd() { mouseX = null; }
+function _bOnTouchEnd() {
+  if (!bLaunched && bPhase === 'playing') {
+    bLaunch();
+  }
+  mouseX = null;
+}
 function _bOnClick() {
+  if (!bLaunched && bPhase === 'playing') {
+    bLaunch();
+    return;
+  }
   if ((bPhase === 'cleared' || bPhase === 'gameover') && !window.scoreModalOpen) {
     buildLayout();
     initPhysics();
