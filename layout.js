@@ -302,7 +302,7 @@ function buildLayoutData(ctx, W, H) {
   const contentH = y + sc(20);
 
   // Center content vertically; minimum offset must clear the HUD at y≈50
-  const offsetY = Math.max(110, (H - contentH) / 2);
+  const offsetY = Math.max(140, (H - contentH) / 2);
   for (const ch of chars)    ch.y += offsetY;
   for (const dv of dividers) dv.y += offsetY;
 

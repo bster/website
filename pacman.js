@@ -98,9 +98,9 @@ function pSpawnPac() {
 function pSpawnGhosts() {
   // Place ghosts at corners of the content area, well away from center
   const positions = [
-    { x: W * 0.15, y: H * 0.2  },
-    { x: W * 0.85, y: H * 0.2  },
-    { x: W * 0.15, y: H * 0.8  },
+    { x: W * 0.15, y: H * 0.35 },
+    { x: W * 0.85, y: H * 0.35 },
+    { x: W * 0.5,  y: H * 0.75 },
   ];
   pGhosts = positions.map((pos, i) => ({
     x:         pos.x,

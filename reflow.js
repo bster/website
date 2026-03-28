@@ -117,16 +117,18 @@ function reflowChars(chars, obstacles, contentLeft, contentRight) {
         const words = [];
         let prevRight = -Infinity;
         let cur = [];
+        let pendingGap = 0;
         for (const ch of line.left) {
           const gap = ch._baseX - prevRight;
           if (gap > 0.5 && cur.length > 0) {
-            words.push({ chars: cur, gapBefore: Math.max(0, gap) });
+            words.push({ chars: cur, gapBefore: pendingGap });
             cur = [];
+            pendingGap = Math.max(0, gap); // gap belongs BEFORE the next word
           }
           cur.push(ch);
           prevRight = ch._baseX + ch.w;
         }
-        if (cur.length > 0) words.push({ chars: cur, gapBefore: 0 });
+        if (cur.length > 0) words.push({ chars: cur, gapBefore: pendingGap });
 
         let sIdx = 0;
         let curX = slots[0].left;
