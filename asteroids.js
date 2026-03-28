@@ -41,6 +41,7 @@ let aDeadTimer = 0;
 let aPhase     = 'playing';
 let aAnimId    = null;
 let aStartTime = 0;
+let aScore     = 0;
 let aKeys      = {};
 let aCanShoot  = true;
 
@@ -87,6 +88,7 @@ function aWrapBullet(b) {
    ═══════════════════════════════════════════════════════════════════ */
 function aKillChar(ch, bvx, bvy) {
   ch.alive = false;
+  aScore  += 100;
 
   const speed = 3 + Math.random() * 7;
   const angle = Math.atan2(bvy, bvx) + (Math.random() - 0.5) * 1.4;
@@ -151,6 +153,7 @@ function aInit() {
   aDeadTimer = 0;
   aPhase     = 'playing';
   aStartTime = Date.now();
+  aScore     = 0;
   aCanShoot  = true;
   aKeys      = {};
   aTouchStart   = null;
@@ -261,11 +264,40 @@ function aUpdate() {
     if (hit) continue;
   }
 
+  // ── Ship-letter collision — flying into a letter costs a life
+  if (!ship.invincible) {
+    for (const ch of aChars) {
+      if (!ch.alive) continue;
+      if (aCircleAABB(ship.x, ship.y, A_SHIP_SIZE + 2, ch.x, ch.y - ch.h, ch.w, ch.h)) {
+        // Explode ship
+        for (let i = 0; i < 14; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const s = 2 + Math.random() * 4;
+          aParticles.push({
+            x: ship.x, y: ship.y,
+            vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+            life: 1, decay: 0.025 + Math.random() * 0.03,
+            r: 1.5 + Math.random() * 2, color: A_SHIP_COLOR,
+          });
+        }
+        aLives--;
+        if (aLives <= 0) {
+          aPhase = 'gameover';
+          showScoreModal(aScore, 'asteroids', null);
+        } else {
+          aPhase     = 'dead';
+          aDeadTimer = A_DEAD_DELAY;
+          aShip      = null;
+        }
+        return;
+      }
+    }
+  }
+
   // ── Win condition
   if (aPhase === 'playing' && aChars.length > 0 && aChars.every(c => !c.alive)) {
     aPhase = 'cleared';
-    const score = calcScore(aStartTime, aLives);
-    showScoreModal(score, 'asteroids', null);
+    showScoreModal(aScore, 'asteroids', null);
   }
 
   // ── Dead chars physics
@@ -391,6 +423,17 @@ function aDraw() {
     }
   }
 
+  // ── HUD: score
+  if (aPhase === 'playing' || aPhase === 'dead') {
+    ctx.save();
+    ctx.font         = `600 12px ${FONT}`;
+    ctx.fillStyle    = 'rgba(0,0,0,0.25)';
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(aScore.toLocaleString(), W - 20, H - 10);
+    ctx.restore();
+  }
+
   // ── HUD: lives
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 22;
@@ -436,9 +479,12 @@ function aDraw() {
       ctx.fillStyle = '#0a0a0a';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('Game over.', W / 2, H / 2 - 20);
+      ctx.fillStyle = '#9a9a9a';
+      ctx.font      = `400 13px ${FONT}`;
+      ctx.fillText(`Score: ${aScore.toLocaleString()}`, W / 2, H / 2 + 14);
       ctx.fillStyle = '#c5c5c5';
       ctx.font      = `400 11px ${FONT}`;
-      ctx.fillText('click to play again', W / 2, H / 2 + 14);
+      ctx.fillText('click to play again', W / 2, H / 2 + 38);
     }
 
     ctx.restore();
