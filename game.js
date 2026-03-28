@@ -25,17 +25,21 @@ const BALL_SPEED   = 4.6;
 const MIN_VY       = 2.2;
 const PADDLE_W     = 120;
 const PADDLE_H     = 5;
+const B_LIVES_MAX  = 3;
+const B_PTS        = 100;   // points per letter
 
 /* ── State ────────────────────────────────────────────────────────── */
-let chars     = [];   // alive character objects
-let dead      = [];   // exploding character objects
-let particles = [];   // small dot sparks
-let dividers  = [];   // horizontal rule positions
+let chars     = [];
+let dead      = [];
+let particles = [];
+let dividers  = [];
 
-let ball      = {};
-let paddle    = {};
-let cleared   = false;
-let animId    = null;
+let ball       = {};
+let paddle     = {};
+let bPhase     = 'playing';   // 'playing' | 'cleared' | 'gameover'
+let bLives     = B_LIVES_MAX;
+let bScore     = 0;
+let animId     = null;
 let bStartTime = 0;
 
 const keys    = { left: false, right: false };
@@ -55,7 +59,7 @@ function initCanvas() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LAYOUT — measures and places every character
+   LAYOUT
    ═══════════════════════════════════════════════════════════════════ */
 function buildLayout() {
   const data = buildLayoutData(ctx, W, H);
@@ -74,22 +78,33 @@ function initPhysics() {
     h: PADDLE_H,
   };
 
-  // Launch ball upward with a random slight angle
   const angle = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 3);
   ball = {
-    x:  W / 2,
-    y:  H - 80,
-    vx: Math.cos(angle) * BALL_SPEED,
-    vy: Math.sin(angle) * BALL_SPEED,
-    r:  BALL_R,
-    // Trail
+    x:     W / 2,
+    y:     H - 80,
+    vx:    Math.cos(angle) * BALL_SPEED,
+    vy:    Math.sin(angle) * BALL_SPEED,
+    r:     BALL_R,
     trail: [],
   };
 
   dead      = [];
   particles = [];
-  cleared   = false;
+  bPhase    = 'playing';
+  bLives    = B_LIVES_MAX;
+  bScore    = 0;
   bStartTime = Date.now();
+}
+
+/* ── Relaunch after losing a life ───────────────────────────────── */
+function bRelaunching() {
+  ball.x     = paddle.x + paddle.w / 2;
+  ball.y     = paddle.y - ball.r - 2;
+  ball.trail = [];
+  const a    = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 4);
+  ball.vx    = Math.cos(a) * BALL_SPEED;
+  ball.vy    = Math.sin(a) * BALL_SPEED;
+  enforceMinVY();
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -107,6 +122,7 @@ function circleAABB(cx, cy, r, rx, ry, rw, rh) {
    ═══════════════════════════════════════════════════════════════════ */
 function killChar(ch) {
   ch.alive = false;
+  bScore  += B_PTS;
 
   const speed = 3 + Math.random() * 7;
   const angle = Math.atan2(ball.vy, ball.vx) + (Math.random() - 0.5) * 1.4;
@@ -126,7 +142,6 @@ function killChar(ch) {
     ealpha: 1,
   });
 
-  // Spark particles
   for (let i = 0; i < 5; i++) {
     const a = Math.random() * Math.PI * 2;
     const s = 1 + Math.random() * 3.5;
@@ -157,7 +172,7 @@ function enforceMinVY() {
    UPDATE
    ═══════════════════════════════════════════════════════════════════ */
 function update() {
-  if (cleared) return;
+  if (bPhase !== 'playing') return;
 
   // ── Paddle
   if (mouseX !== null) {
@@ -182,15 +197,15 @@ function update() {
   if (ball.x + ball.r > W)  { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
   if (ball.y - ball.r < 0)  { ball.y = ball.r;      ball.vy =  Math.abs(ball.vy); }
 
-  // ── Out of bottom — relaunch from paddle
+  // ── Out of bottom — lose a life
   if (ball.y - ball.r > H) {
-    ball.x      = paddle.x + paddle.w / 2;
-    ball.y      = paddle.y - ball.r - 2;
-    ball.trail  = [];
-    const a     = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI / 4);
-    ball.vx     = Math.cos(a) * BALL_SPEED;
-    ball.vy     = Math.sin(a) * BALL_SPEED;
-    enforceMinVY();
+    bLives--;
+    if (bLives <= 0) {
+      bPhase = 'gameover';
+      showScoreModal(bScore, 'breaker', null);
+      return;
+    }
+    bRelaunching();
   }
 
   // ── Paddle collision
@@ -202,7 +217,7 @@ function update() {
     ball.x - ball.r < paddle.x + paddle.w
   ) {
     ball.y = paddle.y - ball.r;
-    const hitPos   = (ball.x - paddle.x) / paddle.w; // 0..1
+    const hitPos   = (ball.x - paddle.x) / paddle.w;
     const maxAngle = Math.PI * 0.33;
     const angle    = -Math.PI / 2 + (hitPos - 0.5) * 2 * maxAngle;
     ball.vx = Math.cos(angle) * BALL_SPEED;
@@ -215,16 +230,14 @@ function update() {
 
   for (const ch of chars) {
     if (!ch.alive) continue;
-    // Character rect: top = y - h (y is baseline, h ≈ cap height)
     if (!circleAABB(ball.x, ball.y, ball.r, ch.x, ch.y - ch.h, ch.w, ch.h)) continue;
 
     killChar(ch);
 
     if (!reflectDone) {
       reflectDone = true;
-      // Use pre-move position to determine which face was hit
-      const wasOverX = prevX + ball.r > ch.x          && prevX - ball.r < ch.x + ch.w;
-      const wasOverY = prevY + ball.r > ch.y - ch.h   && prevY - ball.r < ch.y;
+      const wasOverX = prevX + ball.r > ch.x        && prevX - ball.r < ch.x + ch.w;
+      const wasOverY = prevY + ball.r > ch.y - ch.h && prevY - ball.r < ch.y;
       if      (wasOverX && !wasOverY) ball.vy = -ball.vy;
       else if (!wasOverX && wasOverY) ball.vx = -ball.vx;
       else { ball.vx = -ball.vx; ball.vy = -ball.vy; }
@@ -233,10 +246,9 @@ function update() {
   }
 
   // ── Win condition
-  if (!cleared && chars.every(c => !c.alive)) {
-    cleared = true;
-    const score = calcScore(bStartTime, 0);
-    showScoreModal(score, 'breaker', null);
+  if (chars.every(c => !c.alive)) {
+    bPhase = 'cleared';
+    showScoreModal(bScore, 'breaker', null);
   }
 
   // ── Dead chars physics
@@ -244,8 +256,8 @@ function update() {
     const d = dead[i];
     d.ex    += d.evx;
     d.ey    += d.evy;
-    d.evy   += 0.38;   // gravity
-    d.evx   *= 0.985;  // drag
+    d.evy   += 0.38;
+    d.evx   *= 0.985;
     d.erot  += d.espin;
     d.ealpha -= 0.014;
     if (d.ealpha <= 0) dead.splice(i, 1);
@@ -266,7 +278,6 @@ function update() {
    DRAW
    ═══════════════════════════════════════════════════════════════════ */
 function draw() {
-  // Background
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
 
@@ -280,7 +291,7 @@ function draw() {
     ctx.stroke();
   }
 
-  // ── Dead chars (flying off with spin)
+  // ── Dead chars
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
   for (const d of dead) {
@@ -305,7 +316,7 @@ function draw() {
     ctx.restore();
   }
 
-  // ── Alive characters (batch by font+color to minimise state changes)
+  // ── Alive characters
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign    = 'left';
   let lastFont = null, lastColor = null;
@@ -330,12 +341,10 @@ function draw() {
 
   // ── Ball
   ctx.save();
-  // Soft glow
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.r + 6, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(247,37,133,0.1)';
   ctx.fill();
-  // Body
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
   ctx.fillStyle   = '#f72585';
@@ -344,30 +353,62 @@ function draw() {
   ctx.fill();
   ctx.restore();
 
-  // ── Paddle — thin rounded bar
+  // ── Paddle
   ctx.save();
   ctx.fillStyle = '#1a1a1a';
   pillRect(paddle.x, paddle.y, paddle.w, paddle.h);
   ctx.fill();
   ctx.restore();
 
-  // ── Cleared screen
-  if (cleared) {
+  // ── HUD: lives (small balls) + score
+  if (bPhase === 'playing') {
+    const lx = 20, ly = H - 18;
+    for (let i = 0; i < B_LIVES_MAX; i++) {
+      ctx.save();
+      ctx.globalAlpha = i < bLives ? 0.7 : 0.15;
+      ctx.beginPath();
+      ctx.arc(lx + i * 18, ly, 5, 0, Math.PI * 2);
+      ctx.fillStyle   = '#f72585';
+      ctx.shadowColor = '#f72585';
+      ctx.shadowBlur  = i < bLives ? 8 : 0;
+      ctx.fill();
+      ctx.restore();
+    }
+
     ctx.save();
-    // Fade-in white wash
+    ctx.font         = `600 12px ${FONT}`;
+    ctx.fillStyle    = 'rgba(0,0,0,0.25)';
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(bScore.toLocaleString(), W - 20, H - 10);
+    ctx.restore();
+  }
+
+  // ── End screen
+  if (bPhase === 'cleared' || bPhase === 'gameover') {
+    ctx.save();
     ctx.fillStyle = 'rgba(247,246,243,0.94)';
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle    = '#0a0a0a';
-    ctx.font         = `700 28px ${FONT}`;
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Hire me anyway?', W / 2, H / 2 - 20);
-    ctx.font      = `400 13px ${FONT}`;
-    ctx.fillStyle = '#9a9a9a';
-    ctx.fillText('benjamin.m.stern@gmail.com', W / 2, H / 2 + 14);
+    if (bPhase === 'cleared') {
+      ctx.fillStyle = '#0a0a0a';
+      ctx.font      = `700 28px ${FONT}`;
+      ctx.fillText('Hire me anyway?', W / 2, H / 2 - 20);
+      ctx.font      = `400 13px ${FONT}`;
+      ctx.fillStyle = '#9a9a9a';
+      ctx.fillText('benjamin.m.stern@gmail.com', W / 2, H / 2 + 14);
+    } else {
+      ctx.fillStyle = '#0a0a0a';
+      ctx.font      = `700 28px ${FONT}`;
+      ctx.fillText('Game Over', W / 2, H / 2 - 20);
+      ctx.font      = `400 13px ${FONT}`;
+      ctx.fillStyle = '#9a9a9a';
+      ctx.fillText(`Score: ${bScore.toLocaleString()}`, W / 2, H / 2 + 14);
+    }
     ctx.font      = `400 11px ${FONT}`;
     ctx.fillStyle = '#c5c5c5';
-    ctx.fillText('click to restore', W / 2, H / 2 + 38);
+    ctx.fillText('click to play again', W / 2, H / 2 + 38);
     ctx.restore();
   }
 }
@@ -411,7 +452,10 @@ function _bOnTouchMove(e) {
 }
 function _bOnTouchEnd() { mouseX = null; }
 function _bOnClick() {
-  if (cleared && !window.scoreModalOpen) { buildLayout(); initPhysics(); }
+  if ((bPhase === 'cleared' || bPhase === 'gameover') && !window.scoreModalOpen) {
+    buildLayout();
+    initPhysics();
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

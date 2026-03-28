@@ -44,6 +44,7 @@ let pDeadTimer = 0;
 let pPhase     = 'playing';
 let pAnimId    = null;
 let pStartTime = 0;
+let pScore     = 0;
 let pKeys      = {};
 let pTouchStart = null;
 
@@ -120,6 +121,7 @@ function pInit() {
   pDeadTimer = 0;
   pPhase     = 'playing';
   pStartTime = Date.now();
+  pScore     = 0;
   pKeys      = {};
   pTouchStart = null;
   pBuildLayout();
@@ -187,6 +189,7 @@ function pUpdate() {
     if (!ch.alive) continue;
     if (pCircleAABB(pac.x, pac.y, P_EAT_RADIUS, ch.x, ch.y - ch.h, ch.w, ch.h)) {
       ch.alive = false;
+      pScore  += 100;
       pEaten.push({ char: ch.char, font: ch.font, color: ch.color, x: ch.x, y: ch.y, w: ch.w, h: ch.h, alpha: 1 });
       // Small burst of particles
       for (let i = 0; i < 3; i++) {
@@ -209,8 +212,7 @@ function pUpdate() {
   // ── Win condition
   if (pPhase === 'playing' && pChars.length > 0 && pChars.every(c => !c.alive)) {
     pPhase = 'cleared';
-    const score = calcScore(pStartTime, pLives);
-    showScoreModal(score, 'pacman', null);
+    showScoreModal(pScore, 'pacman', null);
     return;
   }
 
@@ -276,6 +278,7 @@ function pUpdate() {
         pLives--;
         if (pLives <= 0) {
           pPhase = 'gameover';
+          showScoreModal(pScore, 'pacman', null);
         } else {
           pPhase     = 'dead';
           pDeadTimer = P_DEAD_DELAY;
@@ -376,6 +379,17 @@ function pDraw() {
     }
   }
 
+  // ── HUD: score
+  if (pPhase === 'playing' || pPhase === 'dead') {
+    ctx.save();
+    ctx.font         = `600 12px ${FONT}`;
+    ctx.fillStyle    = 'rgba(0,0,0,0.25)';
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(pScore.toLocaleString(), W - 20, H - 10);
+    ctx.restore();
+  }
+
   // ── HUD: lives as small Pac-Man icons top-left
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 24;
@@ -421,9 +435,12 @@ function pDraw() {
       ctx.fillStyle = '#0a0a0a';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('Game over.', W / 2, H / 2 - 20);
+      ctx.fillStyle = '#9a9a9a';
+      ctx.font      = `400 13px ${FONT}`;
+      ctx.fillText(`Score: ${pScore.toLocaleString()}`, W / 2, H / 2 + 14);
       ctx.fillStyle = '#c5c5c5';
       ctx.font      = `400 11px ${FONT}`;
-      ctx.fillText('click to play again', W / 2, H / 2 + 14);
+      ctx.fillText('click to play again', W / 2, H / 2 + 38);
     }
 
     ctx.restore();
