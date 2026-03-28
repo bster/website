@@ -14,9 +14,9 @@
    ─────────────────────────────────────────────────────────────────── */
 
 /* ── Constants ───────────────────────────────────────────────────── */
-const A_BG           = '#f7f6f3';
+const A_BG           = '#f5f1ea';
 const A_DIV_COLOR    = 'rgba(0,0,0,0.1)';
-const A_SHIP_COLOR   = '#1a1a1a';
+const A_SHIP_COLOR   = '#1e1a18';
 const A_BULLET_COLOR = '#f72585';
 
 const A_SHIP_SIZE    = 14;
@@ -458,29 +458,29 @@ function aDraw() {
   // ── Overlays
   if (aPhase === 'cleared' || aPhase === 'gameover') {
     ctx.save();
-    ctx.fillStyle    = 'rgba(247,246,243,0.94)';
+    ctx.fillStyle    = 'rgba(245,241,234,0.94)';
     ctx.fillRect(0, 0, W, H);
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
 
     if (aPhase === 'cleared') {
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#1e1a18';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('All cleared. Hire me anyway?', W / 2, H / 2 - 20);
-      ctx.fillStyle = '#9a9a9a';
+      ctx.fillStyle = '#8a8178';
       ctx.font      = `400 13px ${FONT}`;
       ctx.fillText('benjamin.m.stern@gmail.com', W / 2, H / 2 + 14);
-      ctx.fillStyle = '#c5c5c5';
+      ctx.fillStyle = '#bfb5aa';
       ctx.font      = `400 11px ${FONT}`;
       ctx.fillText('click to play again', W / 2, H / 2 + 38);
     } else {
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#1e1a18';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('Game over.', W / 2, H / 2 - 20);
-      ctx.fillStyle = '#9a9a9a';
+      ctx.fillStyle = '#8a8178';
       ctx.font      = `400 13px ${FONT}`;
       ctx.fillText(`Score: ${aScore.toLocaleString()}`, W / 2, H / 2 + 14);
-      ctx.fillStyle = '#c5c5c5';
+      ctx.fillStyle = '#bfb5aa';
       ctx.font      = `400 11px ${FONT}`;
       ctx.fillText('click to play again', W / 2, H / 2 + 38);
     }

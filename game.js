@@ -15,7 +15,7 @@ let W = window.innerWidth;
 let H = window.innerHeight;
 
 /* ── Design tokens ────────────────────────────────────────────────── */
-const BG        = '#f7f6f3';
+const BG        = '#f5f1ea';
 const DIV_COLOR = 'rgba(0,0,0,0.1)';
 // FONT, S, makeFont defined in layout.js (loaded first)
 
@@ -362,7 +362,7 @@ function draw() {
 
   // ── Paddle
   ctx.save();
-  ctx.fillStyle = '#1a1a1a';
+  ctx.fillStyle = '#1e1a18';
   pillRect(paddle.x, paddle.y, paddle.w, paddle.h);
   ctx.fill();
   ctx.restore();
@@ -404,27 +404,27 @@ function draw() {
   // ── End screen
   if (bPhase === 'cleared' || bPhase === 'gameover') {
     ctx.save();
-    ctx.fillStyle = 'rgba(247,246,243,0.94)';
+    ctx.fillStyle = 'rgba(245,241,234,0.94)';
     ctx.fillRect(0, 0, W, H);
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
     if (bPhase === 'cleared') {
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#1e1a18';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('Hire me anyway?', W / 2, H / 2 - 20);
       ctx.font      = `400 13px ${FONT}`;
-      ctx.fillStyle = '#9a9a9a';
+      ctx.fillStyle = '#8a8178';
       ctx.fillText('benjamin.m.stern@gmail.com', W / 2, H / 2 + 14);
     } else {
-      ctx.fillStyle = '#0a0a0a';
+      ctx.fillStyle = '#1e1a18';
       ctx.font      = `700 28px ${FONT}`;
       ctx.fillText('Game Over', W / 2, H / 2 - 20);
       ctx.font      = `400 13px ${FONT}`;
-      ctx.fillStyle = '#9a9a9a';
+      ctx.fillStyle = '#8a8178';
       ctx.fillText(`Score: ${bScore.toLocaleString()}`, W / 2, H / 2 + 14);
     }
     ctx.font      = `400 11px ${FONT}`;
-    ctx.fillStyle = '#c5c5c5';
+    ctx.fillStyle = '#bfb5aa';
     ctx.fillText('click to play again', W / 2, H / 2 + 38);
     ctx.restore();
   }
