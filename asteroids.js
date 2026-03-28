@@ -423,23 +423,12 @@ function aDraw() {
     }
   }
 
-  // ── HUD: score
-  if (aPhase === 'playing' || aPhase === 'dead') {
-    ctx.save();
-    ctx.font         = `600 12px ${FONT}`;
-    ctx.fillStyle    = 'rgba(0,0,0,0.25)';
-    ctx.textAlign    = 'right';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(aScore.toLocaleString(), W - 20, H - 10);
-    ctx.restore();
-  }
-
-  // ── HUD: lives
+  // ── HUD: lives + score — top-left
+  const _aHudY = 50;
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 22;
-    const ly = 26;
     ctx.save();
-    ctx.translate(lx, ly);
+    ctx.translate(lx, _aHudY);
     ctx.rotate(-Math.PI / 2);
     ctx.beginPath();
     ctx.moveTo(9,  0);
@@ -454,6 +443,15 @@ function aDraw() {
       ctx.lineWidth   = 1.2;
       ctx.stroke();
     }
+    ctx.restore();
+  }
+  if (aPhase === 'playing' || aPhase === 'dead') {
+    ctx.save();
+    ctx.font         = `600 12px ${FONT}`;
+    ctx.fillStyle    = 'rgba(0,0,0,0.25)';
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(aScore.toLocaleString(), 26 + 3 * 22 + 10, _aHudY);
     ctx.restore();
   }
 

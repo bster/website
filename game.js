@@ -360,27 +360,26 @@ function draw() {
   ctx.fill();
   ctx.restore();
 
-  // ── HUD: lives (small balls) + score
+  // ── HUD: lives (small balls) + score — top-left
   if (bPhase === 'playing') {
-    const lx = 20, ly = H - 18;
+    const ly = 50;
     for (let i = 0; i < B_LIVES_MAX; i++) {
       ctx.save();
       ctx.globalAlpha = i < bLives ? 0.7 : 0.15;
       ctx.beginPath();
-      ctx.arc(lx + i * 18, ly, 5, 0, Math.PI * 2);
+      ctx.arc(22 + i * 18, ly, 5, 0, Math.PI * 2);
       ctx.fillStyle   = '#f72585';
       ctx.shadowColor = '#f72585';
       ctx.shadowBlur  = i < bLives ? 8 : 0;
       ctx.fill();
       ctx.restore();
     }
-
     ctx.save();
     ctx.font         = `600 12px ${FONT}`;
     ctx.fillStyle    = 'rgba(0,0,0,0.25)';
-    ctx.textAlign    = 'right';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(bScore.toLocaleString(), W - 20, H - 10);
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(bScore.toLocaleString(), 22 + B_LIVES_MAX * 18 + 10, ly);
     ctx.restore();
   }
 
