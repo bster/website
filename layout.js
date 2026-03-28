@@ -301,8 +301,11 @@ function buildLayoutData(ctx, W, H) {
 
   const contentH = y + sc(20);
 
-  // Center content vertically; minimum offset must clear the HUD at y≈50
-  const offsetY = Math.max(140, (H - contentH) / 2);
+  // Center content vertically; minimum offset must clear the switcher pill
+  const switcherEl = document.querySelector('.game-switcher');
+  const switcherBottom = switcherEl ? switcherEl.getBoundingClientRect().bottom : 60;
+  const minOffsetY = switcherBottom + 28;
+  const offsetY = Math.max(minOffsetY, (H - contentH) / 2);
   for (const ch of chars)    ch.y += offsetY;
   for (const dv of dividers) dv.y += offsetY;
 
