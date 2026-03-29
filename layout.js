@@ -303,7 +303,10 @@ function buildLayoutData(ctx, W, H) {
 
   // Center content vertically; minimum offset clears the in-canvas HUD (lives at y≈50)
   const offsetY = Math.max(80, (H - contentH) / 2);
-  for (const ch of chars)    ch.y += offsetY;
+  for (const ch of chars) {
+    ch.y     += offsetY;
+    ch._baseY += offsetY;  // must match ch.y — reflowChars resets ch.y = ch._baseY each frame
+  }
   for (const dv of dividers) dv.y += offsetY;
 
   return { chars, dividers, contentLeft: lx, contentRight: rx };
