@@ -349,22 +349,19 @@ function pDraw() {
     _pDrawGhost(g.x, g.y, P_GHOST_RADIUS, g.color);
   }
 
-  // ── Pac-Man (blinks when invincible)
+  // ── Pac-Man
   if (pPac && pPhase !== 'dead') {
     const pac   = pPac;
-    const blink = pac.invincible && Math.floor(Date.now() / 80) % 2 === 0;
-    if (!blink) {
-      const dirAngles = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
-      const base      = dirAngles[pac.dir] || 0;
-      ctx.save();
-      ctx.fillStyle = P_PAC_COLOR;
-      ctx.beginPath();
-      ctx.moveTo(pac.x, pac.y);
-      ctx.arc(pac.x, pac.y, P_PAC_RADIUS, base + pac.mouthAngle, base + Math.PI * 2 - pac.mouthAngle);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
+    const dirAngles = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
+    const base      = dirAngles[pac.dir] || 0;
+    ctx.save();
+    ctx.fillStyle = P_PAC_COLOR;
+    ctx.beginPath();
+    ctx.moveTo(pac.x, pac.y);
+    ctx.arc(pac.x, pac.y, P_PAC_RADIUS, base + pac.mouthAngle, base + Math.PI * 2 - pac.mouthAngle);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
 
   // ── HUD: lives + score
