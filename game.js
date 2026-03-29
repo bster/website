@@ -32,7 +32,6 @@ const B_PTS        = 100;   // points per letter
 let chars     = [];
 let dead      = [];
 let particles = [];
-let ripples   = [];
 let dividers  = [];
 
 let ball       = {};
@@ -96,7 +95,6 @@ function initPhysics() {
 
   dead      = [];
   particles = [];
-  ripples   = [];
   bPhase    = 'playing';
   bLives    = B_LIVES_MAX;
   bScore    = 0;
@@ -161,13 +159,6 @@ function killChar(ch) {
       r:     1 + Math.random() * 2,
       color: ch.color,
     });
-  }
-
-  // Water ripple — two concentric rings expanding from the letter's center
-  const rx = ch.x + ch.w * 0.5;
-  const ry = ch.y - ch.h * 0.5;
-  for (let i = 0; i < 2; i++) {
-    ripples.push({ x: rx, y: ry, r: 4, maxR: 40 + i * 22, alpha: 0.55 - i * 0.12, delay: i * 5 });
   }
 }
 
@@ -294,15 +285,6 @@ function update() {
     p.life -= p.decay;
     if (p.life <= 0) particles.splice(i, 1);
   }
-
-  // ── Ripples
-  for (let i = ripples.length - 1; i >= 0; i--) {
-    const rp = ripples[i];
-    if (rp.delay > 0) { rp.delay--; continue; }
-    rp.r     += (rp.maxR - rp.r) * 0.12;
-    rp.alpha -= 0.022;
-    if (rp.alpha <= 0) ripples.splice(i, 1);
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -311,19 +293,6 @@ function update() {
 function draw() {
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
-
-  // ── Ripples
-  for (const rp of ripples) {
-    if (rp.delay > 0) continue;
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, rp.alpha);
-    ctx.strokeStyle = '#f72585';
-    ctx.lineWidth   = 1.2;
-    ctx.beginPath();
-    ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-  }
 
   // ── Dividers
   ctx.strokeStyle = DIV_COLOR;
