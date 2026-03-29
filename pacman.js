@@ -24,6 +24,9 @@ const P_GHOST_RADIUS = 13;
 const P_EAT_RADIUS   = P_PAC_RADIUS + 6;   // eat at reflow boundary
 const P_INVINCIBLE_F = 150;
 const P_DEAD_DELAY   = 100;
+const P_HUD_Y        = 50;
+const P_HUD_DIVIDER_Y = 76;
+const P_CV_TOP_GAP    = 28;
 
 const P_DIRS = {
   right: { dx:  1, dy:  0 },
@@ -55,7 +58,7 @@ let pTouchStart = null;
    ═══════════════════════════════════════════════════════════════════ */
 function pBuildLayout() {
   const data    = buildLayoutData(ctx, W, H);
-  const minContentTop = Math.max(130, H * 0.2);
+  const minContentTop = P_HUD_DIVIDER_Y + P_CV_TOP_GAP;
   let topMostY = Infinity;
   for (const ch of data.chars) {
     if (ch.y < topMostY) topMostY = ch.y;
@@ -328,6 +331,14 @@ function pDraw() {
   ctx.fillStyle = P_BG;
   ctx.fillRect(0, 0, W, H);
 
+  // ── HUD divider — keeps the CV content visually below the HUD
+  ctx.strokeStyle = P_DIV_COLOR;
+  ctx.lineWidth   = 1;
+  ctx.beginPath();
+  ctx.moveTo(46, P_HUD_DIVIDER_Y);
+  ctx.lineTo(W - 46, P_HUD_DIVIDER_Y);
+  ctx.stroke();
+
   // ── Dividers
   ctx.strokeStyle = P_DIV_COLOR;
   ctx.lineWidth   = 1;
@@ -397,7 +408,6 @@ function pDraw() {
   }
 
   // ── HUD: lives + score — top-left
-  const _pHudY = 50;
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 24;
     const r  = 8;
@@ -405,15 +415,15 @@ function pDraw() {
     if (i < pLives) {
       ctx.fillStyle = P_PAC_COLOR;
       ctx.beginPath();
-      ctx.moveTo(lx, _pHudY);
-      ctx.arc(lx, _pHudY, r, 0.25, Math.PI * 2 - 0.25);
+      ctx.moveTo(lx, P_HUD_Y);
+      ctx.arc(lx, P_HUD_Y, r, 0.25, Math.PI * 2 - 0.25);
       ctx.closePath();
       ctx.fill();
     } else {
       ctx.strokeStyle = 'rgba(247,37,133,0.2)';
       ctx.lineWidth   = 1.2;
       ctx.beginPath();
-      ctx.arc(lx, _pHudY, r, 0, Math.PI * 2);
+      ctx.arc(lx, P_HUD_Y, r, 0, Math.PI * 2);
       ctx.stroke();
     }
     ctx.restore();
@@ -424,7 +434,7 @@ function pDraw() {
     ctx.fillStyle    = 'rgba(0,0,0,0.25)';
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(pScore.toLocaleString(), 26 + 3 * 24 + 10, _pHudY);
+    ctx.fillText(pScore.toLocaleString(), 26 + 3 * 24 + 10, P_HUD_Y);
     ctx.restore();
   }
 

@@ -28,6 +28,9 @@ const A_BULLET_SPEED = 9;
 const A_BULLET_LIFE  = 55;
 const A_INVINCIBLE_F = 180;
 const A_DEAD_DELAY   = 90;
+const A_HUD_Y         = 50;
+const A_HUD_DIVIDER_Y = 76;
+const A_CV_TOP_GAP    = 28;
 
 /* ── State ────────────────────────────────────────────────────────── */
 let aChars        = [];
@@ -56,7 +59,7 @@ let aTouchCurrent = null;
    ═══════════════════════════════════════════════════════════════════ */
 function aBuildLayout() {
   const data    = buildLayoutData(ctx, W, H);
-  const minContentTop = Math.max(130, H * 0.2);
+  const minContentTop = A_HUD_DIVIDER_Y + A_CV_TOP_GAP;
   let topMostY = Infinity;
   for (const ch of data.chars) {
     if (ch.y < topMostY) topMostY = ch.y;
@@ -347,6 +350,14 @@ function aDraw() {
   ctx.fillStyle = A_BG;
   ctx.fillRect(0, 0, W, H);
 
+  // ── HUD divider — keeps CV text below the HUD region
+  ctx.strokeStyle = A_DIV_COLOR;
+  ctx.lineWidth   = 1;
+  ctx.beginPath();
+  ctx.moveTo(46, A_HUD_DIVIDER_Y);
+  ctx.lineTo(W - 46, A_HUD_DIVIDER_Y);
+  ctx.stroke();
+
   // ── Dividers
   ctx.strokeStyle = A_DIV_COLOR;
   ctx.lineWidth   = 1;
@@ -441,11 +452,10 @@ function aDraw() {
   }
 
   // ── HUD: lives + score — top-left
-  const _aHudY = 50;
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 22;
     ctx.save();
-    ctx.translate(lx, _aHudY);
+    ctx.translate(lx, A_HUD_Y);
     ctx.rotate(-Math.PI / 2);
     ctx.beginPath();
     ctx.moveTo(9,  0);
@@ -468,7 +478,7 @@ function aDraw() {
     ctx.fillStyle    = 'rgba(0,0,0,0.25)';
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(aScore.toLocaleString(), 26 + 3 * 22 + 10, _aHudY);
+    ctx.fillText(aScore.toLocaleString(), 26 + 3 * 22 + 10, A_HUD_Y);
     ctx.restore();
   }
 
