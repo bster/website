@@ -428,7 +428,7 @@ function aDraw() {
   }
 
   // ── HUD: lives + score — top-left
-  const _aHudY = 50;
+  const _aHudY = safeAreaTop() + 20;
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 22;
     ctx.save();

@@ -384,7 +384,7 @@ function pDraw() {
   }
 
   // ── HUD: lives + score — top-left
-  const _pHudY = 50;
+  const _pHudY = safeAreaTop() + 20;
   for (let i = 0; i < 3; i++) {
     const lx = 26 + i * 24;
     const r  = 8;

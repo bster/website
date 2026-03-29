@@ -14,6 +14,15 @@ const DPR    = window.devicePixelRatio || 1;
 let W = window.innerWidth;
 let H = window.innerHeight;
 
+/* ── Safe-area helper (shared by all game files) ─────────────────── */
+// Reads the CSS --sat variable (set to env(safe-area-inset-top)) so canvas
+// HUDs stay below the iOS status bar / Dynamic Island.
+function safeAreaTop() {
+  return parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--sat')
+  ) || 0;
+}
+
 /* ── Design tokens ────────────────────────────────────────────────── */
 const BG        = '#f5f1ea';
 const DIV_COLOR = 'rgba(0,0,0,0.1)';
@@ -414,7 +423,7 @@ function draw() {
 
   // ── HUD: lives (small balls) + score — top-left
   if (bPhase === 'playing') {
-    const ly = 50;
+    const ly = safeAreaTop() + 20;
     for (let i = 0; i < B_LIVES_MAX; i++) {
       ctx.save();
       ctx.globalAlpha = i < bLives ? 0.7 : 0.15;

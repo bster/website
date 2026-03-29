@@ -7,6 +7,8 @@
   --muted:   #6d645d;
   --rule:    #d8cec3;
   --accent:  #955f3b;
+  --sat:     env(safe-area-inset-top, 0px);    /* iOS notch / Dynamic Island */
+  --sab:     env(safe-area-inset-bottom, 0px); /* home indicator */
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +40,7 @@ html, body {
 /* ── Fixed corner links ─────────────────────────────────────────── */
 .corner-links {
   position: fixed;
-  top: 41px;
+  top: calc(var(--sat) + 14px);
   right: 24px;
   display: flex;
   align-items: center;
@@ -68,7 +70,7 @@ html, body {
 /* ── Game switcher — floating pill bar ─────────────────────────── */
 .game-switcher {
   position: fixed;
-  bottom: 20px;
+  bottom: calc(var(--sab) + 20px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
