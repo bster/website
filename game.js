@@ -163,12 +163,8 @@ function killChar(ch) {
     });
   }
 
-  // Water ripple — two concentric rings expanding from the letter's center
-  const rx = ch.x + ch.w * 0.5;
-  const ry = ch.y - ch.h * 0.5;
-  for (let i = 0; i < 2; i++) {
-    ripples.push({ x: rx, y: ry, r: 4, maxR: 40 + i * 22, alpha: 0.55 - i * 0.12, delay: i * 5 });
-  }
+  // Ripple — expanding ring that displaces nearby alive letters as it passes
+  ripples.push({ x: ch.x + ch.w * 0.5, y: ch.y - ch.h * 0.5, r: 0, strength: 1 });
 }
 
 /* ── Prevent nearly-horizontal ball ──────────────────────────────── */
@@ -295,13 +291,12 @@ function update() {
     if (p.life <= 0) particles.splice(i, 1);
   }
 
-  // ── Ripples
+  // ── Ripples — expand and fade
   for (let i = ripples.length - 1; i >= 0; i--) {
     const rp = ripples[i];
-    if (rp.delay > 0) { rp.delay--; continue; }
-    rp.r     += (rp.maxR - rp.r) * 0.12;
-    rp.alpha -= 0.022;
-    if (rp.alpha <= 0) ripples.splice(i, 1);
+    rp.r        += 4.5;
+    rp.strength -= 0.03;
+    if (rp.strength <= 0) ripples.splice(i, 1);
   }
 }
 
@@ -311,19 +306,6 @@ function update() {
 function draw() {
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
-
-  // ── Ripples
-  for (const rp of ripples) {
-    if (rp.delay > 0) continue;
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, rp.alpha);
-    ctx.strokeStyle = '#f72585';
-    ctx.lineWidth   = 1.2;
-    ctx.beginPath();
-    ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-  }
 
   // ── Dividers
   ctx.strokeStyle = DIV_COLOR;
@@ -360,7 +342,9 @@ function draw() {
     ctx.restore();
   }
 
-  // ── Alive characters
+  // ── Alive characters (with ripple displacement)
+  const RIPPLE_BW  = 30;   // ring bandwidth (px)
+  const RIPPLE_AMP = 7;    // max vertical displacement (px)
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign    = 'left';
   let lastFont = null, lastColor = null;
@@ -368,7 +352,20 @@ function draw() {
     if (!ch.alive) continue;
     if (ch.font  !== lastFont)  { ctx.font      = ch.font;  lastFont  = ch.font;  }
     if (ch.color !== lastColor) { ctx.fillStyle = ch.color; lastColor = ch.color; }
-    ctx.fillText(ch.char, ch.x, ch.y);
+    // Compute vertical ripple offset from all active ripples
+    let dy = 0;
+    if (ripples.length > 0) {
+      const cx = ch.x + ch.w * 0.5;
+      const cy = ch.y - ch.h * 0.5;
+      for (const rp of ripples) {
+        const dist  = Math.hypot(cx - rp.x, cy - rp.y);
+        const dwave = dist - rp.r;
+        if (Math.abs(dwave) < RIPPLE_BW) {
+          dy += Math.sin((dwave / RIPPLE_BW) * Math.PI) * RIPPLE_AMP * rp.strength;
+        }
+      }
+    }
+    ctx.fillText(ch.char, ch.x, ch.y + dy);
   }
 
   // ── Ball trail
