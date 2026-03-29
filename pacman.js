@@ -55,6 +55,19 @@ let pTouchStart = null;
    ═══════════════════════════════════════════════════════════════════ */
 function pBuildLayout() {
   const data    = buildLayoutData(ctx, W, H);
+  const minContentTop = Math.max(130, H * 0.2);
+  let topMostY = Infinity;
+  for (const ch of data.chars) {
+    if (ch.y < topMostY) topMostY = ch.y;
+  }
+  const extraTopOffset = Number.isFinite(topMostY) ? Math.max(0, minContentTop - topMostY) : 0;
+  if (extraTopOffset > 0) {
+    for (const ch of data.chars) {
+      ch.y += extraTopOffset;
+      ch._baseY += extraTopOffset;
+    }
+    for (const d of data.dividers) d.y += extraTopOffset;
+  }
   pChars        = data.chars;
   pDividers     = data.dividers;
   pContentLeft  = data.contentLeft;
