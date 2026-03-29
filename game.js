@@ -66,13 +66,19 @@ function buildLayout() {
   dividers = data.dividers;
 }
 
+// Paddle Y: 16px above the switcher pill, using its actual rendered position
+function bPaddleY() {
+  const sw = document.querySelector('.game-switcher');
+  return sw ? sw.getBoundingClientRect().top - 16 : H - 60;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    PHYSICS INIT
    ═══════════════════════════════════════════════════════════════════ */
 function initPhysics() {
   paddle = {
     x: W / 2 - PADDLE_W / 2,
-    y: H - 44,
+    y: bPaddleY(),
     w: PADDLE_W,
     h: PADDLE_H,
   };
@@ -453,7 +459,7 @@ function loop() {
     canvas.width  = W * DPR;
     canvas.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    paddle.y = H - 44;
+    paddle.y = bPaddleY();
     paddle.x = Math.min(paddle.x, W - paddle.w);
     if (!bLaunched) {
       ball.x = paddle.x + paddle.w / 2;
