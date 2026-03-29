@@ -306,7 +306,10 @@ function buildLayoutData(ctx, W, H) {
   const switcherBottom = switcherEl ? switcherEl.getBoundingClientRect().bottom : 60;
   const minOffsetY = switcherBottom + 28;
   const offsetY = Math.max(minOffsetY, (H - contentH) / 2);
-  for (const ch of chars)    ch.y += offsetY;
+  for (const ch of chars) {
+    ch.y     += offsetY;
+    ch._baseY += offsetY;  // must match ch.y — reflowChars resets ch.y = ch._baseY each frame
+  }
   for (const dv of dividers) dv.y += offsetY;
 
   return { chars, dividers, contentLeft: lx, contentRight: rx };
