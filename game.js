@@ -66,10 +66,10 @@ function buildLayout() {
   dividers = data.dividers;
 }
 
-// Paddle Y: 16px above the switcher pill, using its actual rendered position
+// Paddle Y: high enough to clear the bottom switcher pill (bottom:20px, ~37px tall)
+// and leave room for the ball + "click to launch" label above the paddle.
 function bPaddleY() {
-  const sw = document.querySelector('.game-switcher');
-  return sw ? sw.getBoundingClientRect().top - 16 : H - 60;
+  return H - 120;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
