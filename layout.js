@@ -229,14 +229,17 @@ function buildLayoutData(ctx, W, H) {
       const cw = ctx.measureText(c).width;
       if (c.trim() !== '') {
         chars.push({
-          char:  c,
-          x:     curX,
-          y:     baseY,
-          w:     cw,
-          h:     style.size,
-          font:  fnt,
-          color: style.color,
-          alive: true,
+          char:   c,
+          x:      curX,
+          y:      baseY,
+          _baseX: curX,
+          _baseY: baseY,
+          _align: align === 'right' ? 'right' : 'left',
+          w:      cw,
+          h:      style.size,
+          font:   fnt,
+          color:  style.color,
+          alive:  true,
         });
       }
       curX += cw + spacing;
@@ -298,10 +301,13 @@ function buildLayoutData(ctx, W, H) {
 
   const contentH = y + sc(20);
 
-  // Center content vertically; minimum offset must clear the HUD at y≈50
-  const offsetY = Math.max(110, (H - contentH) / 2);
+  // Center content vertically; minimum offset must clear the switcher pill
+  const switcherEl = document.querySelector('.game-switcher');
+  const switcherBottom = switcherEl ? switcherEl.getBoundingClientRect().bottom : 60;
+  const minOffsetY = switcherBottom + 28;
+  const offsetY = Math.max(minOffsetY, (H - contentH) / 2);
   for (const ch of chars)    ch.y += offsetY;
   for (const dv of dividers) dv.y += offsetY;
 
-  return { chars, dividers };
+  return { chars, dividers, contentLeft: lx, contentRight: rx };
 }
