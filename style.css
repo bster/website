@@ -38,7 +38,7 @@ html, body {
 /* ── Fixed corner links ─────────────────────────────────────────── */
 .corner-links {
   position: fixed;
-  bottom: 24px;
+  top: 20px;
   right: 24px;
   display: flex;
   align-items: center;
