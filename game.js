@@ -72,7 +72,7 @@ function buildLayout() {
 function initPhysics() {
   paddle = {
     x: W / 2 - PADDLE_W / 2,
-    y: H - 44,
+    y: H - 80,
     w: PADDLE_W,
     h: PADDLE_H,
   };
@@ -453,7 +453,7 @@ function loop() {
     canvas.width  = W * DPR;
     canvas.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    paddle.y = H - 44;
+    paddle.y = H - 80;
     paddle.x = Math.min(paddle.x, W - paddle.w);
     if (!bLaunched) {
       ball.x = paddle.x + paddle.w / 2;
