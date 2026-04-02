@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Apps — Ben Stern</title>
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────────────── */
+    :root {
+      color-scheme: light;
+      --page:   #f5f1ea;
+      --panel:  #fffdf8;
+      --ink:    #1e1a18;
+      --muted:  #6d645d;
+      --rule:   #d8cec3;
+      --accent: #955f3b;
+      --sat:    env(safe-area-inset-top, 0px);
+      --sab:    env(safe-area-inset-bottom, 0px);
+      --font-serif: Georgia, "Times New Roman", serif;
+      --font-sans:  "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.6;
+      padding-top: var(--sat);
+      padding-bottom: calc(var(--sab) + 32px);
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────────────── */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      background: color-mix(in srgb, var(--page) 90%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--rule);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+    }
+
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font: 400 13px/1 var(--font-sans);
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 160ms ease;
+    }
+    .nav-back:hover { color: var(--ink); }
+    .nav-back svg { width: 14px; height: 14px; }
+
+    .nav-title {
+      font: 600 13px/1 var(--font-sans);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────────── */
+    .page-content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Hero ────────────────────────────────────────────────────────── */
+    .app-hero {
+      padding: 64px 0 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .app-eyebrow {
+      font: 500 11px/1 var(--font-sans);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .app-name {
+      font: 700 48px/1.1 var(--font-serif);
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    .app-tagline {
+      font: 400 20px/1.4 var(--font-sans);
+      color: var(--muted);
+      max-width: 480px;
+    }
+
+    .app-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--ink);
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font: 600 14px/1 var(--font-sans);
+      transition: opacity 160ms ease;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+    .app-store-btn:hover { opacity: 0.82; }
+    .app-store-btn svg { width: 20px; height: 20px; fill: #fff; flex-shrink: 0; }
+    .app-store-btn span { display: flex; flex-direction: column; gap: 3px; }
+    .app-store-btn .btn-sub  { font: 400 10px/1 var(--font-sans); opacity: 0.72; letter-spacing: 0.03em; }
+    .app-store-btn .btn-main { font: 700 15px/1 var(--font-sans); }
+
+    /* ── Screenshots ─────────────────────────────────────────────────── */
+    .screenshots-section {
+      padding: 16px 0 56px;
+    }
+
+    .screenshots-scroll {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 12px 0 20px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .screenshots-scroll::-webkit-scrollbar { display: none; }
+
+    .phone-frame {
+      flex: 0 0 auto;
+      width: 220px;
+      background: #111;
+      border-radius: 36px;
+      padding: 10px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.08) inset,
+        0 20px 60px rgba(30,26,24,0.18),
+        0 4px 16px rgba(30,26,24,0.1);
+      position: relative;
+    }
+
+    .phone-screen {
+      border-radius: 28px;
+      overflow: hidden;
+      background: #e8e4dd;
+      aspect-ratio: 9/19.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phone-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* placeholder shown when image is missing */
+    .phone-screen .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.3;
+      font: 400 11px/1.4 var(--font-sans);
+      color: var(--ink);
+      text-align: center;
+      padding: 16px;
+    }
+    .phone-screen .placeholder svg { width: 28px; height: 28px; }
+
+    .phone-notch {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 72px;
+      height: 22px;
+      background: #111;
+      border-radius: 0 0 14px 14px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ── Divider ─────────────────────────────────────────────────────── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--rule);
+      margin: 0;
+    }
+
+    /* ── Description ─────────────────────────────────────────────────── */
+    .description-section {
+      padding: 56px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .section-label {
+      font: 500 11px/1 var(--font-sans);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .description-lead {
+      font: 400 19px/1.6 var(--font-sans);
+      color: var(--ink);
+    }
+
+    .description-body {
+      font: 400 15px/1.75 var(--font-sans);
+      color: var(--muted);
+    }
+
+    .features-heading {
+      font: 700 16px/1.3 var(--font-serif);
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+
+    .features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font: 400 15px/1.5 var(--font-sans);
+      color: var(--muted);
+    }
+
+    .features-list li::before {
+      content: '';
+      display: block;
+      flex-shrink: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 8px;
+    }
+
+    .made-for-block {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 16px;
+      padding: 28px 32px;
+    }
+
+    .made-for-block h3 {
+      font: 700 18px/1.3 var(--font-serif);
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .made-for-block p {
+      font: 400 15px/1.7 var(--font-sans);
+      color: var(--muted);
+    }
+
+    /* ── Privacy Policy ──────────────────────────────────────────────── */
+    .privacy-section {
+      padding: 56px 0 24px;
+    }
+
+    .privacy-section h2 {
+      font: 700 28px/1.2 var(--font-serif);
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .privacy-section .privacy-date {
+      font: 400 13px/1 var(--font-sans);
+      color: var(--rule);
+      margin-bottom: 40px;
+    }
+
+    .privacy-block {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    .privacy-block h3 {
+      font: 700 16px/1.3 var(--font-serif);
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .privacy-block p, .privacy-block ul {
+      font: 400 14px/1.75 var(--font-sans);
+      color: var(--muted);
+    }
+
+    .privacy-block ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-left: 16px;
+    }
+
+    .privacy-block ul li::before {
+      content: '– ';
+      color: var(--rule);
+    }
+
+    .privacy-contact {
+      font: 400 14px/1.6 var(--font-sans);
+      color: var(--muted);
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 8px;
+    }
+
+    .privacy-contact a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .privacy-contact a:hover { text-decoration: underline; }
+
+    /* ── Footer ──────────────────────────────────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--rule);
+      margin-top: 64px;
+      padding: 32px 24px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-copy {
+      font: 400 12px/1 var(--font-sans);
+      color: var(--rule);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      font: 400 12px/1 var(--font-sans);
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 160ms ease;
+    }
+    .footer-links a:hover { color: var(--ink); }
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .app-name { font-size: 36px; }
+      .app-tagline { font-size: 17px; }
+      .made-for-block { padding: 20px; }
+      .page-content { padding: 0 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="site-nav">
+    <a class="nav-back" href="/">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Ben Stern
+    </a>
+    <span class="nav-title">Apps</span>
+    <span style="width:72px"></span><!-- balance the back link -->
+  </nav>
+
+  <main class="page-content">
+
+    <!-- Hero -->
+    <header class="app-hero">
+      <p class="app-eyebrow">iOS App</p>
+      <h1 class="app-name">Our Storybook</h1>
+      <p class="app-tagline">Helps kids turn their ideas into personalized storybooks.</p>
+
+      <!-- App Store button — replace href with the real App Store link -->
+      <a class="app-store-btn" href="#" aria-label="Download Our Storybook on the App Store">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        <span>
+          <span class="btn-sub">Download on the</span>
+          <span class="btn-main">App Store</span>
+        </span>
+      </a>
+    </header>
+
+    <!-- Screenshots -->
+    <section class="screenshots-section" aria-label="App screenshots">
+      <div class="screenshots-scroll">
+
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <img src="images/storybook-1.png" alt="Our Storybook — generated dinosaur image result screen"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="placeholder" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              Screenshot 1
+            </div>
+          </div>
+        </div>
+
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <img src="images/storybook-2.png" alt="Our Storybook — Reuse and Refine image screen"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="placeholder" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              Screenshot 2
+            </div>
+          </div>
+        </div>
+
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <img src="images/storybook-3.png" alt="Our Storybook — book editor screen"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="placeholder" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              Screenshot 3
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Description -->
+    <section class="description-section">
+      <div>
+        <p class="section-label">About</p>
+        <p class="description-lead">
+          Our Storybook helps kids turn their ideas into personalized storybooks.
+        </p>
+      </div>
+
+      <p class="description-body">
+        Start with a drawing, transform it into an AI-generated image, and add your own
+        words to build a story page by page.
+      </p>
+
+      <div>
+        <p class="features-heading">With Our Storybook, kids can:</p>
+        <ul class="features-list">
+          <li>Draw their own characters, animals, and scenes</li>
+          <li>Generate colorful images inspired by their drawings</li>
+          <li>Write or tell stories in their own words</li>
+          <li>Create personalized books from their imagination</li>
+          <li>Enjoy creative play through art and storytelling</li>
+        </ul>
+      </div>
+
+      <div class="made-for-block">
+        <h3>Made for young creators</h3>
+        <p>
+          Our Storybook is designed to be simple, playful, and creative. Kids can make
+          dinosaur adventures, bedtime stories, funny animal tales, and more — all from
+          their own ideas.
+        </p>
+        <br>
+        <p>
+          Whether used independently or together with a parent, Our Storybook makes it
+          easy to create a book that feels personal and fun.
+        </p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Privacy Policy -->
+    <section id="privacy" class="privacy-section">
+      <h2>Privacy Policy</h2>
+      <p class="privacy-date">Last updated: [Date]</p>
+
+      <div class="privacy-block">
+
+        <div>
+          <h3>Overview</h3>
+          <p>
+            Our Storybook ("the App") is designed for children and their families.
+            We take privacy seriously and have built the App to minimize data collection.
+            This policy describes what information is collected, how it is used, and your rights.
+          </p>
+        </div>
+
+        <div>
+          <h3>Information We Collect</h3>
+          <p>
+            The App does not require account creation or the collection of personal
+            information to use its core features. The following data may be processed:
+          </p>
+          <ul>
+            <li>Drawings and images you create within the App, processed to generate AI images (not stored on our servers after generation)</li>
+            <li>Text entered by the user for story pages (stored locally on your device only)</li>
+            <li>Standard usage data collected by Apple through the App Store (subject to Apple's privacy policy)</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3>Children's Privacy</h3>
+          <p>
+            Our Storybook is intended for use by children under the supervision of a parent
+            or guardian. The App does not knowingly collect personal information from children.
+            All content is stored locally on the device and is not transmitted to external
+            servers except as described in this policy.
+          </p>
+        </div>
+
+        <div>
+          <h3>AI Image Generation</h3>
+          <p>
+            When a user requests an AI-generated image, the drawing or prompt is sent to a
+            third-party AI service to produce the image. This data is used solely to generate
+            the image and is not retained, sold, or used for any other purpose. Please review
+            the privacy policy of our AI service provider for more details. [Provider name and link to be added.]
+          </p>
+        </div>
+
+        <div>
+          <h3>Data Storage</h3>
+          <p>
+            Storybooks, images, and written content are stored locally on your device using
+            Apple's standard storage mechanisms. We do not operate servers that store your
+            creative content. You may delete the App and all associated data at any time
+            through your device settings.
+          </p>
+        </div>
+
+        <div>
+          <h3>Third-Party Services</h3>
+          <p>
+            The App may use the following third-party services, each governed by their own
+            privacy policies:
+          </p>
+          <ul>
+            <li>Apple App Store (distribution and optional in-app purchases)</li>
+            <li>AI image generation provider [to be specified]</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3>Your Rights</h3>
+          <p>
+            Since personal data is stored locally on your device, you retain full control.
+            You can delete the App and all its data at any time. If you have questions or
+            concerns about data handled by third-party services, please contact us.
+          </p>
+        </div>
+
+        <div>
+          <h3>Changes to This Policy</h3>
+          <p>
+            We may update this privacy policy from time to time. Any changes will be
+            reflected on this page with an updated date. Continued use of the App after
+            changes constitutes acceptance of the updated policy.
+          </p>
+        </div>
+
+        <div>
+          <h3>Contact</h3>
+          <div class="privacy-contact">
+            Questions about this privacy policy or the App?<br>
+            Reach out at <a href="mailto:benjamin.m.stern@gmail.com">benjamin.m.stern@gmail.com</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p class="footer-copy">© 2025 Ben Stern</p>
+    <nav class="footer-links">
+      <a href="/">Home</a>
+      <a href="#privacy">Privacy Policy</a>
+    </nav>
+  </footer>
+
+</body>
+</html>
