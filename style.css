@@ -67,6 +67,15 @@ html, body {
   height: 18px;
 }
 
+.corner-apps-link {
+  font: 500 11px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding-right: 4px;
+  border-right: 1px solid var(--rule);
+  margin-right: 4px;
+}
+
 /* ── Game switcher — floating pill bar ─────────────────────────── */
 .game-switcher {
   position: fixed;
